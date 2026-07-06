@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   type Course,
   type Campus,
@@ -158,7 +157,7 @@ export function BookingSheet({
         </div>
 
         {/* ── Scrollable body ── */}
-        <ScrollArea className="flex-1">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-5 space-y-5">
             <p className="text-sm text-muted-foreground leading-relaxed">
               {course.description}
@@ -362,7 +361,7 @@ export function BookingSheet({
               </div>
             </div>
           </div>
-        </ScrollArea>
+        </div>
 
         {/* ── Footer CTA ── */}
         <div className="p-5 border-t border-border bg-card shrink-0">

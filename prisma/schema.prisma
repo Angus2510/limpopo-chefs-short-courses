@@ -1,0 +1,39 @@
+// Prisma schema — Limpopo Chefs Academy Short Courses
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Booking {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Customer details
+  firstName String
+  lastName  String
+  email     String
+  phone     String?
+
+  // Course details
+  courseId    String
+  courseTitle String
+  campus      String // "Mokopane" | "Polokwane"
+  date        String // YYYY-MM-DD
+  participants Int
+
+  // Payment
+  amount   Int    // in cents (ZAR)
+  currency String @default("ZAR")
+  status   String @default("pending") // pending | paid | failed | cancelled
+
+  // Yoco references
+  yocoCheckoutId   String? @unique
+  yocoPaymentId    String?
+  clientReferenceId String?
+}

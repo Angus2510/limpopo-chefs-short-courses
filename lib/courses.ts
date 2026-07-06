@@ -5,6 +5,10 @@ export type Category =
   | "World Cuisine"
   | "Dining & Wine";
 
+export type Campus = "Mokopane" | "Polokwane";
+
+export const CAMPUSES: Campus[] = ["Mokopane", "Polokwane"];
+
 export interface Course {
   id: string;
   title: string;

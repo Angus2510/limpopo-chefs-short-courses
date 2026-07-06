@@ -9,9 +9,11 @@ import { BookingSheet } from "@/components/booking-sheet";
 import {
   COURSES,
   CATEGORIES,
+  CAMPUSES,
   formatPrice,
   type Course,
   type Category,
+  type Campus,
 } from "@/lib/courses";
 import { ChefHat, Clock, MapPin, Phone, Users } from "lucide-react";
 
@@ -25,6 +27,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 
 export default function ShortCoursesPage() {
   const [activeCategory, setActiveCategory] = useState<Category | "All">("All");
+  const [activeCampus, setActiveCampus] = useState<Campus | "All">("All");
   const [bookingCourse, setBookingCourse] = useState<Course | null>(null);
 
   const visible =
@@ -119,7 +122,7 @@ export default function ShortCoursesPage() {
       {/* ── Courses ── */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
         {/* Category filters */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-2 mb-3">
           {(["All", ...CATEGORIES] as Array<"All" | Category>).map((cat) => (
             <Button
               key={cat}
@@ -129,6 +132,23 @@ export default function ShortCoursesPage() {
               onClick={() => setActiveCategory(cat)}
             >
               {cat === "All" ? "All Courses" : cat}
+            </Button>
+          ))}
+        </div>
+
+        {/* Campus filter */}
+        <div className="flex items-center gap-2 mb-8">
+          <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
+          <span className="text-xs text-muted-foreground mr-1">Campus:</span>
+          {(["All", ...CAMPUSES] as Array<"All" | Campus>).map((c) => (
+            <Button
+              key={c}
+              variant={activeCampus === c ? "default" : "outline"}
+              size="sm"
+              className="rounded-[21px]"
+              onClick={() => setActiveCampus(c)}
+            >
+              {c === "All" ? "Both" : c}
             </Button>
           ))}
         </div>
@@ -253,9 +273,11 @@ export default function ShortCoursesPage() {
 
       {/* Booking sheet */}
       <BookingSheet
+        key={bookingCourse?.id ?? ""}
         course={bookingCourse}
         open={bookingCourse !== null}
         onClose={() => setBookingCourse(null)}
+        defaultCampus={activeCampus === "All" ? null : activeCampus}
       />
     </div>
   );

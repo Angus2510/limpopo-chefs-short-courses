@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
   Sheet,
   SheetClose,
@@ -13,31 +13,102 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { type Course, formatPrice, formatDate } from "@/lib/courses";
-import { Check, Clock, Minus, Plus, Shield, Users, X } from "lucide-react";
+import {
+  type Course,
+  type Campus,
+  formatPrice,
+  formatDate,
+} from "@/lib/courses";
+import {
+  Check,
+  Clock,
+  Loader2,
+  MapPin,
+  Minus,
+  Plus,
+  Shield,
+  Users,
+  X,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface BookingSheetProps {
   course: Course | null;
   open: boolean;
   onClose: () => void;
+  defaultCampus?: Campus | null;
 }
 
-export function BookingSheet({ course, open, onClose }: BookingSheetProps) {
+const INPUT =
+  "w-full h-9 px-3 text-sm rounded-lg border border-border bg-background placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary transition-shadow";
+
+export function BookingSheet({
+  course,
+  open,
+  onClose,
+  defaultCampus,
+}: BookingSheetProps) {
+  const [campus, setCampus] = useState<Campus | null>(defaultCampus ?? null);
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [participants, setParticipants] = useState(1);
-
-  useEffect(() => {
-    if (open) {
-      setSelectedDate(null);
-      setParticipants(1);
-    }
-  }, [open, course?.id]);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!course) return null;
 
   const total = course.price * participants;
-  const canBook = selectedDate !== null;
+  const canBook =
+    !!campus &&
+    !!selectedDate &&
+    firstName.trim().length > 0 &&
+    lastName.trim().length > 0 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+
+  async function handleBook() {
+    if (!canBook || loading) return;
+    setLoading(true);
+    setError(null);
+
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseId: course!.id,
+          courseTitle: course!.title,
+          campus,
+          date: selectedDate,
+          participants,
+          pricePerPerson: course!.price,
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          email: email.trim(),
+          phone: phone.trim() || undefined,
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(
+          (data as { error?: string }).error ?? "Failed to create booking",
+        );
+      }
+
+      const { redirectUrl } = (await res.json()) as { redirectUrl: string };
+      window.location.href = redirectUrl;
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Something went wrong. Please try again.",
+      );
+      setLoading(false);
+    }
+  }
 
   return (
     <Sheet
@@ -95,7 +166,34 @@ export function BookingSheet({ course, open, onClose }: BookingSheetProps) {
 
             <Separator />
 
-            {/* Date selection */}
+            {/* ── Campus selection ── */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-1.5">
+                <MapPin className="w-3.5 h-3.5 text-primary" />
+                Select Campus
+              </h3>
+              <div className="grid grid-cols-2 gap-2">
+                {(["Mokopane", "Polokwane"] as Campus[]).map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => setCampus(c)}
+                    className={cn(
+                      "flex flex-col items-center gap-1.5 p-3 rounded-xl border text-sm font-medium transition-all",
+                      campus === c
+                        ? "border-primary bg-primary/8 text-primary"
+                        : "border-border text-muted-foreground hover:border-primary/50 hover:text-foreground",
+                    )}
+                  >
+                    <MapPin className="w-4 h-4" />
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* ── Date selection ── */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">
                 Choose a Date
@@ -120,7 +218,7 @@ export function BookingSheet({ course, open, onClose }: BookingSheetProps) {
 
             <Separator />
 
-            {/* Participants */}
+            {/* ── Participants ── */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">
                 Participants
@@ -160,7 +258,69 @@ export function BookingSheet({ course, open, onClose }: BookingSheetProps) {
 
             <Separator />
 
-            {/* What's included */}
+            {/* ── Customer details ── */}
+            <div>
+              <h3 className="text-sm font-semibold text-foreground mb-3">
+                Your Details
+              </h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-foreground block mb-1">
+                    First Name <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="Jane"
+                    className={INPUT}
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-foreground block mb-1">
+                    Last Name <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                    className={INPUT}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs font-medium text-foreground block mb-1">
+                    Email Address <span className="text-destructive">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="jane@example.com"
+                    className={INPUT}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <label className="text-xs font-medium text-foreground block mb-1">
+                    Phone Number{" "}
+                    <span className="text-muted-foreground font-normal">
+                      (optional)
+                    </span>
+                  </label>
+                  <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="+27 82 XXX XXXX"
+                    className={INPUT}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* ── What's included ── */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">
                 What&apos;s Included
@@ -180,7 +340,7 @@ export function BookingSheet({ course, open, onClose }: BookingSheetProps) {
 
             <Separator />
 
-            {/* Price summary */}
+            {/* ── Price summary ── */}
             <div className="bg-muted rounded-xl p-4 space-y-2.5">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
@@ -206,19 +366,24 @@ export function BookingSheet({ course, open, onClose }: BookingSheetProps) {
 
         {/* ── Footer CTA ── */}
         <div className="p-5 border-t border-border bg-card shrink-0">
+          {error && (
+            <p className="text-xs text-destructive mb-3 text-center">{error}</p>
+          )}
           <Button
             className="w-full rounded-[21px] h-12 text-base font-semibold"
-            disabled={!canBook}
-            onClick={() => {
-              // Yoco payment integration — coming soon
-              alert(
-                `Booking Summary\n\nCourse: ${course.title}\nDate: ${formatDate(selectedDate!)}\nParticipants: ${participants}\nTotal: ${formatPrice(total)}\n\nYoco payment integration coming soon.`,
-              );
-            }}
+            disabled={!canBook || loading}
+            onClick={handleBook}
           >
-            {canBook
-              ? `Proceed to Payment · ${formatPrice(total)}`
-              : "Select a Date to Continue"}
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Redirecting to payment…
+              </>
+            ) : canBook ? (
+              `Proceed to Payment · ${formatPrice(total)}`
+            ) : (
+              "Fill in all details to continue"
+            )}
           </Button>
           <p className="flex items-center justify-center gap-1.5 mt-2.5 text-xs text-muted-foreground">
             <Shield className="w-3 h-3" />

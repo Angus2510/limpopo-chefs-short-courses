@@ -47,7 +47,10 @@ export function BookingSheet({
   onClose,
   defaultCampus,
 }: BookingSheetProps) {
-  const [campus, setCampus] = useState<Campus | null>(defaultCampus ?? null);
+  const [campus, setCampus] = useState<Campus | null>(
+    defaultCampus ??
+      (course?.campuses.length === 1 ? course.campuses[0]! : null),
+  );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [participants, setParticipants] = useState(1);
   const [firstName, setFirstName] = useState("");
@@ -60,9 +63,10 @@ export function BookingSheet({
   if (!course) return null;
 
   const total = course.price * participants;
+  const hasDates = course.availableDates.length > 0;
   const canBook =
     !!campus &&
-    !!selectedDate &&
+    (!hasDates || !!selectedDate) &&
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
@@ -172,7 +176,10 @@ export function BookingSheet({
                 Select Campus
               </h3>
               <div className="grid grid-cols-2 gap-2">
-                {(["Mokopane", "Polokwane"] as Campus[]).map((c) => (
+                {(course.campuses.length > 0
+                  ? course.campuses
+                  : (["Mokopane", "Polokwane"] as Campus[])
+                ).map((c) => (
                   <button
                     key={c}
                     onClick={() => setCampus(c)}
@@ -197,22 +204,40 @@ export function BookingSheet({
               <h3 className="text-sm font-semibold text-foreground mb-3">
                 Choose a Date
               </h3>
-              <div className="grid grid-cols-2 gap-2">
-                {course.availableDates.map((date) => (
-                  <button
-                    key={date}
-                    onClick={() => setSelectedDate(date)}
-                    className={cn(
-                      "text-left px-3 py-2.5 rounded-lg border text-xs font-medium transition-all",
-                      selectedDate === date
-                        ? "border-primary bg-primary text-white"
-                        : "border-border text-muted-foreground hover:border-primary hover:text-primary",
-                    )}
+              {course.availableDates.length === 0 ? (
+                <div className="bg-muted rounded-lg p-4 text-center space-y-1">
+                  <p className="text-sm font-medium text-foreground">
+                    Dates to be confirmed
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Contact us to register your interest and we’ll notify you
+                    when dates are set.
+                  </p>
+                  <a
+                    href="mailto:info@limpopochefs.co.za"
+                    className="text-xs text-primary underline underline-offset-2 hover:opacity-80"
                   >
-                    {formatDate(date)}
-                  </button>
-                ))}
-              </div>
+                    info@limpopochefs.co.za
+                  </a>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2">
+                  {course.availableDates.map((date) => (
+                    <button
+                      key={date}
+                      onClick={() => setSelectedDate(date)}
+                      className={cn(
+                        "text-left px-3 py-2.5 rounded-lg border text-xs font-medium transition-all",
+                        selectedDate === date
+                          ? "border-primary bg-primary text-white"
+                          : "border-border text-muted-foreground hover:border-primary hover:text-primary",
+                      )}
+                    >
+                      {formatDate(date)}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <Separator />

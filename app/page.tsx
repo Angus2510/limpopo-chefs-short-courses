@@ -23,6 +23,7 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   Pastry: "from-rose-600 to-rose-900",
   "World Cuisine": "from-orange-500 to-red-800",
   "Dining & Wine": "from-purple-700 to-purple-950",
+  "Events & Experiences": "from-teal-600 to-teal-900",
 };
 
 export default function ShortCoursesPage() {
@@ -30,10 +31,13 @@ export default function ShortCoursesPage() {
   const [activeCampus, setActiveCampus] = useState<Campus | "All">("All");
   const [bookingCourse, setBookingCourse] = useState<Course | null>(null);
 
-  const visible =
-    activeCategory === "All"
-      ? COURSES
-      : COURSES.filter((c) => c.category === activeCategory);
+  const visible = COURSES.filter((c) => {
+    const categoryMatch =
+      activeCategory === "All" || c.category === activeCategory;
+    const campusMatch =
+      activeCampus === "All" || c.campuses.includes(activeCampus as Campus);
+    return categoryMatch && campusMatch;
+  });
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -109,7 +113,7 @@ export default function ShortCoursesPage() {
               {COURSES.length} Courses Available
             </div>
             <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 text-sm text-white font-medium">
-              Starting from R850
+              Starting from R450
             </div>
             <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 text-sm text-white font-medium">
               <Users className="w-4 h-4" />

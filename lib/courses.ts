@@ -36,57 +36,6 @@ export const CATEGORIES: Category[] = [
 
 export const COURSES: Course[] = [
   // ── July 2026 ──────────────────────────────────────────────────────────────
-  {
-    id: "opening-gala",
-    title: "Opening Gala Cocktail Event",
-    category: "Events & Experiences",
-    description:
-      "Celebrate the launch of the 2026 short course programme with an elegant gala. Enjoy expertly crafted canapés, welcome cocktails, and a showcase of our chefs' finest work.",
-    duration: "Half Day (4 hrs)",
-    price: 600,
-    availableDates: ["2026-07-10"],
-    maxParticipants: 50,
-    instructor:
-      "Chef Kelly, Chef Breyton, Chef Potego, Chef Kopano & Chef Franco",
-    includes: [
-      "Welcome cocktail",
-      "Canapés & amuse-bouche",
-      "Wine & beverages",
-    ],
-    emoji: "🥂",
-    campuses: ["Polokwane"],
-  },
-  {
-    id: "opening-dinner",
-    title: "Opening Dinner – 4 Course Experience",
-    category: "Dining & Wine",
-    description:
-      "An unforgettable four-course dinner curated by our professional chefs. Experience fine dining in an intimate setting — the perfect way to open the 2026 season.",
-    duration: "Evening (3 hrs)",
-    price: 750,
-    availableDates: ["2026-07-11"],
-    maxParticipants: 50,
-    instructor:
-      "Chef Kelly, Chef Breyton, Chef Potego, Chef Kopano & Chef Franco",
-    includes: ["4-course dinner", "Wine pairing", "Chef's table experience"],
-    emoji: "🍽️",
-    campuses: ["Polokwane"],
-  },
-  {
-    id: "chef-for-a-day",
-    title: "Chef for a Day",
-    category: "Fundamentals",
-    description:
-      "Ever wondered what it's like to work in a professional kitchen? Spend a full day behind the scenes, working alongside our chefs to prepare, cook, and plate restaurant-quality dishes.",
-    duration: "1 Day (8 hrs)",
-    price: 850,
-    availableDates: ["2026-07-25"],
-    maxParticipants: 20,
-    instructor: "Chef Franco & Chef Breyton",
-    includes: ["All ingredients", "Chef's apron", "Recipe booklet", "Lunch"],
-    emoji: "👨‍🍳",
-    campuses: ["Mokopane", "Polokwane"],
-  },
 
   // ── August 2026 ────────────────────────────────────────────────────────────
   {

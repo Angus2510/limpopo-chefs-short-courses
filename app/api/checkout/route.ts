@@ -120,9 +120,15 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ redirectUrl: checkout.redirectUrl });
   } catch (error) {
-    console.error("[checkout] Error:", error);
+    const message = error instanceof Error ? error.message : String(error);
+    console.error("[checkout] Error:", message);
     return NextResponse.json(
-      { error: "Internal server error" },
+      {
+        error:
+          process.env.NODE_ENV === "development"
+            ? message
+            : "Internal server error",
+      },
       { status: 500 },
     );
   }

@@ -13,7 +13,11 @@ function safeCompare(a: string, b: string) {
   return timingSafeEqual(aBuf, bBuf);
 }
 
-function verifyWebhookSignature(req: NextRequest, rawBody: string, secret: string) {
+function verifyWebhookSignature(
+  req: NextRequest,
+  rawBody: string,
+  secret: string,
+) {
   const signatureHeader = req.headers.get("webhook-signature") ?? "";
   if (!signatureHeader) return false;
 
@@ -47,9 +51,11 @@ function verifyWebhookSignature(req: NextRequest, rawBody: string, secret: strin
   }
 
   // Legacy fallback if a non-whsec secret is configured.
-  const expectedHex = createHmac("sha256", secret).update(rawBody).digest("hex");
+  const expectedHex = createHmac("sha256", secret)
+    .update(rawBody)
+    .digest("hex");
   const provided = signatureHeader.startsWith("v1,")
-    ? signatureHeader.split(",", 2)[1] ?? ""
+    ? (signatureHeader.split(",", 2)[1] ?? "")
     : signatureHeader;
   return !!provided && safeCompare(provided, expectedHex);
 }

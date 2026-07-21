@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -46,9 +47,14 @@ export default function ShortCoursesPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           {/* Logo */}
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center shrink-0">
-              <ChefHat className="w-4 h-4 text-white" />
-            </div>
+            <Image
+              src="/logo.png"
+              alt="Limpopo Chefs Academy logo"
+              width={180}
+              height={70}
+              className="h-10 w-auto shrink-0"
+              priority
+            />
             <div className="leading-none">
               <p className="text-[11px] font-bold uppercase tracking-widest text-primary">
                 Limpopo Chefs Academy
@@ -85,6 +91,20 @@ export default function ShortCoursesPage() {
           </div>
         </div>
       </header>
+
+      {/* Top campaign banner */}
+      <section className="w-full bg-white border-b border-border">
+        <div className="relative w-full h-[210px] sm:h-[300px] md:h-[380px] lg:h-[460px] overflow-hidden">
+          <Image
+            src="/short-course-banner-new.jpg"
+            alt="Limpopo Chefs Academy campaign banner"
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+        </div>
+      </section>
 
       {/* ── Hero ── */}
       <section className="relative bg-primary py-16 md:py-24 overflow-hidden">

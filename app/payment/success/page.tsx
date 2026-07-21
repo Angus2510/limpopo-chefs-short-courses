@@ -10,6 +10,13 @@ export default async function PaymentSuccessPage({
 }) {
   const { ref } = await searchParams;
 
+  if (ref) {
+    await prisma.booking.updateMany({
+      where: { clientReferenceId: ref, status: "pending" },
+      data: { status: "paid" },
+    });
+  }
+
   const booking = ref
     ? await prisma.booking.findFirst({ where: { clientReferenceId: ref } })
     : null;

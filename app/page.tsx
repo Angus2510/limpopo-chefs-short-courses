@@ -27,6 +27,22 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
   "Events & Experiences": "from-teal-600 to-teal-900",
 };
 
+// Keep this list updated to control what can be booked right now.
+const CURRENTLY_AVAILABLE_COURSE_IDS = new Set<string>([
+  "lets-go-to-asia", // Asian Cooking Class
+  "cooking-club-aug", // 3rd Wednesday Cooking Club
+  "cooking-club-sep",
+  "cooking-club-oct",
+  "cooking-club-nov",
+  "barista-croissants", // Barista & Croissant
+  "macaron-class",
+  "gourmet-cookies", // Gourmet Filled Cookies
+]);
+
+function isCourseAvailable(course: Course) {
+  return CURRENTLY_AVAILABLE_COURSE_IDS.has(course.id);
+}
+
 export default function ShortCoursesPage() {
   const [activeCategory, setActiveCategory] = useState<Category | "All">("All");
   const [activeCampus, setActiveCampus] = useState<Campus | "All">("All");
@@ -179,66 +195,80 @@ export default function ShortCoursesPage() {
 
         {/* Course grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {visible.map((course) => (
-            <Card
-              key={course.id}
-              className="overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300"
-              style={{ "--card-spacing": "0px" } as React.CSSProperties}
-            >
-              {/* Gradient image area */}
-              <div
-                className={`relative h-40 bg-linear-to-br ${CATEGORY_GRADIENTS[course.category]} flex items-center justify-center shrink-0`}
+          {visible.map((course) => {
+            const available = isCourseAvailable(course);
+            return (
+              <Card
+                key={course.id}
+                className="relative overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300"
+                style={{ "--card-spacing": "0px" } as React.CSSProperties}
               >
-                <span className="text-6xl drop-shadow select-none">
-                  {course.emoji}
-                </span>
-                <div className="absolute top-3 left-3">
-                  <Badge className="bg-white/25 text-white border-white/30 text-[10px]">
-                    {course.category}
+                {!available && (
+                  <Badge className="absolute top-3 right-3 z-10 bg-amber-500 text-white border-amber-400">
+                    Coming Soon
                   </Badge>
-                </div>
-              </div>
+                )}
 
-              {/* Body */}
-              <div className="flex flex-col flex-1 px-4 pt-4 pb-0">
-                <h3 className="font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
-                  {course.title}
-                </h3>
-                <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3 shrink-0" />
-                    {course.duration}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Users className="w-3 h-3 shrink-0" />
-                    Max {course.maxParticipants}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground mt-3 line-clamp-3 flex-1">
-                  {course.description}
-                </p>
-              </div>
-
-              {/* Footer */}
-              <div className="flex items-center justify-between px-4 py-3 mt-3 border-t border-border">
-                <div>
-                  <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                    From
-                  </p>
-                  <p className="text-lg font-bold text-primary leading-none">
-                    {formatPrice(course.price)}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  className="rounded-[21px]"
-                  onClick={() => setBookingCourse(course)}
+                {/* Gradient image area */}
+                <div
+                  className={`relative h-40 bg-linear-to-br ${CATEGORY_GRADIENTS[course.category]} flex items-center justify-center shrink-0 ${!available ? "saturate-50" : ""}`}
                 >
-                  Book Now
-                </Button>
-              </div>
-            </Card>
-          ))}
+                  <span className="text-6xl drop-shadow select-none">
+                    {course.emoji}
+                  </span>
+                  <div className="absolute top-3 left-3">
+                    <Badge className="bg-white/25 text-white border-white/30 text-[10px]">
+                      {course.category}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Body */}
+                <div
+                  className={`flex flex-col flex-1 px-4 pt-4 pb-0 ${!available ? "opacity-75 blur-[1px]" : ""}`}
+                >
+                  <h3 className="font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
+                    {course.title}
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3 h-3 shrink-0" />
+                      {course.duration}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-3 h-3 shrink-0" />
+                      Max {course.maxParticipants}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-3 line-clamp-3 flex-1">
+                    {course.description}
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <div
+                  className={`flex items-center justify-between px-4 py-3 mt-3 border-t border-border ${!available ? "opacity-80" : ""}`}
+                >
+                  <div>
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                      From
+                    </p>
+                    <p className="text-lg font-bold text-primary leading-none">
+                      {formatPrice(course.price)}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    className="rounded-[21px]"
+                    disabled={!available}
+                    onClick={() => available && setBookingCourse(course)}
+                  >
+                    {available ? "Book Now" : "Coming Soon"}
+                  </Button>
+                </div>
+              </Card>
+            );
+          })}
         </div>
       </main>
 

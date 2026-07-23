@@ -22,6 +22,7 @@ export interface Course {
   instructor: string;
   includes: string[];
   emoji: string;
+  cardImage?: string;
   campuses: Campus[];
 }
 
@@ -38,26 +39,7 @@ export const COURSES: Course[] = [
   // ── July 2026 ──────────────────────────────────────────────────────────────
 
   // ── August 2026 ────────────────────────────────────────────────────────────
-  {
-    id: "lets-go-to-asia",
-    title: "Let's Go to Asia",
-    category: "World Cuisine",
-    description:
-      "Dive into the vibrant flavours of Asia. Learn to prepare authentic Ramen, delicate Dim Sum, and silky Potato Noodles — mastering the techniques and flavour profiles of Asian cuisine.",
-    duration: "1 Day (8 hrs)",
-    price: 950,
-    availableDates: ["2026-08-15"],
-    maxParticipants: 16,
-    instructor: "Chef Kelly, Chef Breyton & Chef Kopano",
-    includes: [
-      "All ingredients",
-      "Chef's apron",
-      "Recipe booklet",
-      "Asian-inspired lunch",
-    ],
-    emoji: "🥢",
-    campuses: ["Polokwane"],
-  },
+
   {
     id: "cooking-club-aug",
     title: "Cooking Club: Butter Chicken & Paratha",
@@ -91,6 +73,7 @@ export const COURSES: Course[] = [
       "Take-home croissants",
     ],
     emoji: "☕",
+    cardImage: "/barista.jpeg",
     campuses: ["Polokwane"],
   },
 
@@ -113,6 +96,7 @@ export const COURSES: Course[] = [
       "Macaron box to take home",
     ],
     emoji: "🫐",
+    cardImage: "/macrons.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -167,6 +151,7 @@ export const COURSES: Course[] = [
       "Filled cookies to take home",
     ],
     emoji: "🍪",
+    cardImage: "/cookie.jpeg",
     campuses: ["Polokwane"],
   },
   {

@@ -211,11 +211,21 @@ export default function ShortCoursesPage() {
 
                 {/* Gradient image area */}
                 <div
-                  className={`relative h-40 bg-linear-to-br ${CATEGORY_GRADIENTS[course.category]} flex items-center justify-center shrink-0 ${!available ? "saturate-50" : ""}`}
+                  className={`relative h-40 flex items-center justify-center shrink-0 overflow-hidden ${!course.cardImage ? `bg-linear-to-br ${CATEGORY_GRADIENTS[course.category]}` : ""} ${!available ? "saturate-50" : ""}`}
                 >
-                  <span className="text-6xl drop-shadow select-none">
-                    {course.emoji}
-                  </span>
+                  {course.cardImage ? (
+                    <Image
+                      src={course.cardImage}
+                      alt={`${course.title} course image`}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                    />
+                  ) : (
+                    <span className="text-6xl drop-shadow select-none">
+                      {course.emoji}
+                    </span>
+                  )}
                   <div className="absolute top-3 left-3">
                     <Badge className="bg-white/25 text-white border-white/30 text-[10px]">
                       {course.category}

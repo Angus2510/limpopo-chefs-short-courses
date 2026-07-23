@@ -60,7 +60,7 @@ export const COURSES: Course[] = [
     title: "Barista & Croissants",
     category: "Baking",
     description:
-      "Learn the fundamentals of professional coffee making alongside the art of croissant preparation. Leave with both barista skills and a box of freshly baked, buttery croissants.",
+      "Learn the fundamentals of professional coffee preparation while mastering the art of buttery, flaky croissants from scratch. This hands-on class combines essential barista skills with artisan baking techniques, leaving you with the confidence to recreate café-quality favourites at home.",
     duration: "1 Day (8 hrs)",
     price: 850,
     availableDates: ["2026-08-29"],
@@ -83,7 +83,7 @@ export const COURSES: Course[] = [
     title: "Macaron Class",
     category: "Pastry",
     description:
-      "Unlock the secrets to perfect French macarons. Learn the precise techniques behind the batter, filling, and finishing — and how to troubleshoot the most common mistakes.",
+      "Discover the secrets to perfect French macarons from mixing and piping to baking and filling. You'll create beautiful handcrafted macarons to take home while learning tips for consistent results every time.",
     duration: "1 Day (8 hrs)",
     price: 950,
     availableDates: ["2026-09-05"],
@@ -104,7 +104,7 @@ export const COURSES: Course[] = [
     title: "Cooking Club: Chicken & Mushroom Ravioli",
     category: "Fundamentals",
     description:
-      "This month's budget cooking lesson is a classic Italian comfort dish — homemade Chicken & Mushroom Ravioli. Make fresh pasta dough and a rich, creamy filling from scratch.",
+      "Join us every third Wednesday for a relaxed evening of cooking, learning and great food. Each month features a brand-new recipe and hands-on experience led by our professional chefs. Come for the cooking, stay for the company",
     duration: "Evening (3 hrs)",
     price: 450,
     availableDates: ["2026-09-16"],
@@ -138,7 +138,7 @@ export const COURSES: Course[] = [
     title: "Gourmet Filled Cookies",
     category: "Baking",
     description:
-      "Elevate your baking with premium filled cookies. Learn professional techniques for baking, filling, and finishing gourmet cookies worthy of any patisserie window.",
+      "Learn how to create bakery-style gourmet cookies using one versatile dough and four delicious flavour variations. You'll leave with 16 freshly baked cookies and the confidence to recreate them at home.",
     duration: "1 Day (8 hrs)",
     price: 750,
     availableDates: ["2026-09-19"],
@@ -151,7 +151,7 @@ export const COURSES: Course[] = [
       "Filled cookies to take home",
     ],
     emoji: "🍪",
-    cardImage: "/cookie.jpeg",
+    cardImage: "/cookies.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -201,7 +201,7 @@ export const COURSES: Course[] = [
     title: "Sushi Class",
     category: "World Cuisine",
     description:
-      "Learn the foundations of professional sushi preparation — sushi rice, fish selection, maki, nigiri, and plating. Leave with the skills and confidence to create restaurant-quality sushi at home.",
+      "Discover the art of authentic sushi making in this fun and interactive hands-on class. Learn how to prepare sushi rice, roll a variety of sushi styles, and work with fresh ingredients while mastering techniques you can easily recreate in your own kitchen.",
     duration: "1 Day (8 hrs)",
     price: 950,
     availableDates: ["2026-10-03"],
@@ -214,6 +214,7 @@ export const COURSES: Course[] = [
       "Sushi lunch",
     ],
     emoji: "🍣",
+    cardImage: "/sushi.jpeg",
     campuses: ["Polokwane"],
   },
   {

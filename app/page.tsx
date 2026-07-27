@@ -112,50 +112,13 @@ export default function ShortCoursesPage() {
       <section className="w-full bg-white border-b border-border">
         <div className="relative w-full h-52.5 sm:h-75 md:h-95 lg:h-115 overflow-hidden">
           <Image
-            src="/banner.jpeg"
+            src="/banner.png"
             alt="Limpopo Chefs Academy campaign banner"
             fill
             priority
             className="object-contain object-center"
             sizes="100vw"
           />
-        </div>
-      </section>
-
-      {/* ── Hero ── */}
-      <section className="relative bg-primary py-16 md:py-24 overflow-hidden">
-        {/* Subtle dot pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-[0.07]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='1' cy='1' r='1' fill='%23ffffff'/%3E%3C/svg%3E")`,
-            backgroundSize: "20px 20px",
-          }}
-        />
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Badge className="mb-4 bg-white/20 text-white border-white/30 hover:bg-white/25">
-            Professional Development
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 tracking-tight">
-            Short Courses
-          </h1>
-          <p className="text-white/75 text-lg md:text-xl max-w-2xl mb-8 leading-relaxed">
-            Hands-on culinary workshops led by professional chefs. No prior
-            experience required — just a passion for food.
-          </p>
-          <div className="flex flex-wrap gap-3">
-            <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 text-sm text-white font-medium">
-              <ChefHat className="w-4 h-4" />
-              {COURSES.length} Courses Available
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 text-sm text-white font-medium">
-              Starting from R450
-            </div>
-            <div className="flex items-center gap-2 bg-white/10 rounded-full px-4 py-2 text-sm text-white font-medium">
-              <Users className="w-4 h-4" />
-              Small Groups Only
-            </div>
-          </div>
         </div>
       </section>
 

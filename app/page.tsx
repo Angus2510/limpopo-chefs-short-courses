@@ -110,13 +110,13 @@ export default function ShortCoursesPage() {
 
       {/* Top campaign banner */}
       <section className="w-full bg-white border-b border-border">
-        <div className="relative w-full h-[210px] sm:h-[300px] md:h-[380px] lg:h-[460px] overflow-hidden">
+        <div className="relative w-full h-52.5 sm:h-75 md:h-95 lg:h-115 overflow-hidden">
           <Image
             src="/banner.jpeg"
             alt="Limpopo Chefs Academy campaign banner"
             fill
             priority
-            className="object-cover object-center"
+            className="object-contain object-center"
             sizes="100vw"
           />
         </div>

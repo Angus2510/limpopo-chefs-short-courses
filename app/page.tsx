@@ -112,7 +112,7 @@ export default function ShortCoursesPage() {
       <section className="w-full bg-white border-b border-border">
         <div className="relative w-full h-[210px] sm:h-[300px] md:h-[380px] lg:h-[460px] overflow-hidden">
           <Image
-            src="/short-course-banner-new.jpg"
+            src="/banner.jpeg"
             alt="Limpopo Chefs Academy campaign banner"
             fill
             priority

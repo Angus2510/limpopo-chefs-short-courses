@@ -53,6 +53,7 @@ export const COURSES: Course[] = [
     instructor: "Chef Kelly & Chef Franco",
     includes: ["All ingredients", "Tasting portions", "Recipe card"],
     emoji: "🍛",
+    cardImage: "/3rdwed.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -96,7 +97,7 @@ export const COURSES: Course[] = [
       "Macaron box to take home",
     ],
     emoji: "🫐",
-    cardImage: "/macrons.jpeg",
+    cardImage: "/macaron.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -112,6 +113,7 @@ export const COURSES: Course[] = [
     instructor: "Chef Kelly",
     includes: ["All ingredients", "Tasting portions", "Recipe card"],
     emoji: "🍝",
+    cardImage: "/3rdwed.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -131,6 +133,7 @@ export const COURSES: Course[] = [
       "Exclusive dining experience",
     ],
     emoji: "🕯️",
+    cardImage: "/secret.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -151,7 +154,7 @@ export const COURSES: Course[] = [
       "Filled cookies to take home",
     ],
     emoji: "🍪",
-    cardImage: "/cookies.jpeg",
+    cardImage: "/cookie.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -171,6 +174,7 @@ export const COURSES: Course[] = [
       "Prize giving ceremony",
     ],
     emoji: "🏆",
+    cardImage: "/potjie.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -235,6 +239,7 @@ export const COURSES: Course[] = [
       "Daily snack & lunch",
     ],
     emoji: "🎒",
+    cardImage: "/holiday.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -269,6 +274,7 @@ export const COURSES: Course[] = [
       "Costume competition prize",
     ],
     emoji: "🎃",
+    cardImage: "/halloween.jpeg",
     campuses: ["Polokwane"],
   },
 
@@ -291,6 +297,7 @@ export const COURSES: Course[] = [
       "Christmas cake to take home",
     ],
     emoji: "🎄",
+    cardImage: "/chrismas.jpeg",
     campuses: ["Polokwane"],
   },
   {
@@ -326,6 +333,7 @@ export const COURSES: Course[] = [
       "Decorated canvas cake to take home",
     ],
     emoji: "🎨",
+    cardImage: "/cakes.jpeg",
     campuses: ["Polokwane"],
   },
   {

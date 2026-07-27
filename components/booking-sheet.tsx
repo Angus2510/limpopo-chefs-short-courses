@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   Sheet,
   SheetClose,
@@ -132,9 +133,21 @@ export function BookingSheet({
             <span className="sr-only">Close</span>
           </SheetClose>
 
-          <div className="text-5xl mb-3 leading-none select-none">
-            {course.emoji}
-          </div>
+          {course.cardImage ? (
+            <div className="relative w-full h-28 mb-3 rounded-xl overflow-hidden bg-white/15 ring-1 ring-white/25">
+              <Image
+                src={course.cardImage}
+                alt={`${course.title} image`}
+                fill
+                className="object-cover"
+                sizes="(max-width: 640px) 100vw, 420px"
+              />
+            </div>
+          ) : (
+            <div className="text-5xl mb-3 leading-none select-none">
+              {course.emoji}
+            </div>
+          )}
 
           <SheetHeader className="p-0 gap-0.5">
             <SheetTitle className="text-white text-xl font-bold leading-snug">

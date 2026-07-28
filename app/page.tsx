@@ -77,7 +77,9 @@ export default function ShortCoursesPage() {
     (acc, course) => {
       const firstDate = [...course.availableDates].sort()[0];
       const key = firstDate ? firstDate.slice(0, 7) : "9999-12";
-      const label = firstDate ? getMonthLabel(firstDate) : "Dates To Be Confirmed";
+      const label = firstDate
+        ? getMonthLabel(firstDate)
+        : "Dates To Be Confirmed";
 
       if (!acc[key]) {
         acc[key] = { label, courses: [] };
@@ -204,7 +206,8 @@ export default function ShortCoursesPage() {
                 {section.label}
               </h2>
               <Badge variant="secondary" className="rounded-full px-3 py-0.5">
-                {section.courses.length} {section.courses.length === 1 ? "course" : "courses"}
+                {section.courses.length}{" "}
+                {section.courses.length === 1 ? "course" : "courses"}
               </Badge>
             </div>
 
@@ -281,7 +284,9 @@ export default function ShortCoursesPage() {
                         </div>
                       ) : (
                         <div className="mb-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5">
-                          <p className="text-sm font-medium text-muted-foreground">Dates to be confirmed</p>
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Dates to be confirmed
+                          </p>
                         </div>
                       )}
 

@@ -17,6 +17,12 @@ export interface Course {
   description: string;
   duration: string;
   price: number;
+  bookingChoices?: Array<{
+    id: string;
+    label: string;
+    price: number;
+    note?: string;
+  }>;
   availableDates: string[]; // ISO: YYYY-MM-DD — empty means TBC
   maxParticipants: number;
   instructor: string;
@@ -41,13 +47,43 @@ export const COURSES: Course[] = [
   // ── August 2026 ────────────────────────────────────────────────────────────
 
   {
+    id: "lets-go-to-asia",
+    title: "Asian Cooking Class",
+    category: "World Cuisine",
+    description:
+      "A hands-on Asian cooking workshop focused on bold flavours, balanced seasoning, and practical techniques you can recreate at home. ",
+    duration: "Morning (3 hrs)",
+    price: 550,
+    availableDates: ["2026-08-15"],
+    maxParticipants: 20,
+    instructor: "Chef Kelly & Chef Franco",
+    includes: ["All ingredients", "Tasting portions", "Recipe card"],
+    emoji: "🥢",
+    campuses: ["Polokwane"],
+  },
+
+  {
     id: "cooking-club-aug",
-    title: "Cooking Club: Butter Chicken & Paratha",
+    title: "3rd Wednesday Cooking Club: Butter Chicken & Garlic Naan",
     category: "Fundamentals",
     description:
-      "Our monthly budget cooking club — this session tackles a crowd favourite. Make a rich, aromatic Butter Chicken from scratch, served with freshly rolled Paratha flatbread, all on a budget.",
+      "Our monthly budget cooking club — this session tackles a crowd favourite. Make a rich, aromatic Butter Chicken from scratch, served with freshly made Garlic Naan, all on a budget.",
     duration: "Evening (3 hrs)",
-    price: 450,
+    price: 200,
+    bookingChoices: [
+      {
+        id: "cook-with-class",
+        label: "Cook with class",
+        price: 275,
+        note: "Hands-on cooking session",
+      },
+      {
+        id: "takeaway",
+        label: "Takeaway order",
+        price: 200,
+        note: "Order for collection",
+      },
+    ],
     availableDates: ["2026-08-19"],
     maxParticipants: 25,
     instructor: "Chef Kelly & Chef Franco",

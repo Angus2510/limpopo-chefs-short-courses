@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { BookingSheet } from "@/components/booking-sheet";
 import {
@@ -31,16 +32,32 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 const CURRENTLY_AVAILABLE_COURSE_IDS = new Set<string>([
   "lets-go-to-asia", // Asian Cooking Class
   "cooking-club-aug", // 3rd Wednesday Cooking Club
-  "cooking-club-sep",
-  "cooking-club-oct",
-  "cooking-club-nov",
-  "barista-croissants", // Barista & Croissant
-  "macaron-class",
-  "gourmet-cookies", // Gourmet Filled Cookies
 ]);
+
+const CONFIRMED_TIMES: Record<string, string> = {
+  "lets-go-to-asia": "09:00",
+  "cooking-club-aug": "17:30",
+};
 
 function isCourseAvailable(course: Course) {
   return CURRENTLY_AVAILABLE_COURSE_IDS.has(course.id);
+}
+
+function getMonthLabel(dateStr: string) {
+  const date = new Date(`${dateStr}T00:00:00`);
+  return date.toLocaleDateString("en-ZA", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function getDateParts(dateStr: string) {
+  const date = new Date(`${dateStr}T00:00:00`);
+  return {
+    day: date.toLocaleDateString("en-ZA", { day: "2-digit" }),
+    month: date.toLocaleDateString("en-ZA", { month: "short" }).toUpperCase(),
+    weekday: date.toLocaleDateString("en-ZA", { weekday: "long" }),
+  };
 }
 
 export default function ShortCoursesPage() {
@@ -55,6 +72,30 @@ export default function ShortCoursesPage() {
       activeCampus === "All" || c.campuses.includes(activeCampus as Campus);
     return categoryMatch && campusMatch;
   });
+
+  const groupedByMonth = visible.reduce(
+    (acc, course) => {
+      const firstDate = [...course.availableDates].sort()[0];
+      const key = firstDate ? firstDate.slice(0, 7) : "9999-12";
+      const label = firstDate ? getMonthLabel(firstDate) : "Dates To Be Confirmed";
+
+      if (!acc[key]) {
+        acc[key] = { label, courses: [] };
+      }
+
+      acc[key].courses.push(course);
+      return acc;
+    },
+    {} as Record<string, { label: string; courses: Course[] }>,
+  );
+
+  const monthSections = Object.entries(groupedByMonth)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([key, value]) => ({
+      key,
+      label: value.label,
+      courses: value.courses,
+    }));
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -156,93 +197,141 @@ export default function ShortCoursesPage() {
           ))}
         </div>
 
-        {/* Course grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {visible.map((course) => {
-            const available = isCourseAvailable(course);
-            return (
-              <Card
-                key={course.id}
-                className="relative overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300"
-                style={{ "--card-spacing": "0px" } as React.CSSProperties}
-              >
-                {!available && (
-                  <Badge className="absolute top-3 right-3 z-10 bg-amber-500 text-white border-amber-400">
-                    Coming Soon
-                  </Badge>
-                )}
+        {monthSections.map((section) => (
+          <section key={section.key} className="mb-10 last:mb-0">
+            <div className="mb-4 flex items-center gap-3">
+              <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
+                {section.label}
+              </h2>
+              <Badge variant="secondary" className="rounded-full px-3 py-0.5">
+                {section.courses.length} {section.courses.length === 1 ? "course" : "courses"}
+              </Badge>
+            </div>
 
-                {/* Gradient image area */}
-                <div
-                  className={`relative h-40 flex items-center justify-center shrink-0 overflow-hidden ${!course.cardImage ? `bg-linear-to-br ${CATEGORY_GRADIENTS[course.category]}` : ""} ${!available ? "saturate-50" : ""}`}
-                >
-                  {course.cardImage ? (
-                    <Image
-                      src={course.cardImage}
-                      alt={`${course.title} course image`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
-                    />
-                  ) : (
-                    <span className="text-6xl drop-shadow select-none">
-                      {course.emoji}
-                    </span>
-                  )}
-                  <div className="absolute top-3 left-3">
-                    <Badge className="bg-white/25 text-white border-white/30 text-[10px]">
-                      {course.category}
-                    </Badge>
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {section.courses.map((course) => {
+                const available = isCourseAvailable(course);
+                const nextDate = [...course.availableDates].sort()[0] ?? null;
+                const dateParts = nextDate ? getDateParts(nextDate) : null;
+                const timeLabel = CONFIRMED_TIMES[course.id];
 
-                {/* Body */}
-                <div
-                  className={`flex flex-col flex-1 px-4 pt-4 pb-0 ${!available ? "opacity-75 blur-[1px]" : ""}`}
-                >
-                  <h3 className="font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
-                    {course.title}
-                  </h3>
-                  <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 shrink-0" />
-                      {course.duration}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="w-3 h-3 shrink-0" />
-                      Max {course.maxParticipants}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-3 line-clamp-3 flex-1">
-                    {course.description}
-                  </p>
-                </div>
-
-                {/* Footer */}
-                <div
-                  className={`flex items-center justify-between px-4 py-3 mt-3 border-t border-border ${!available ? "opacity-80" : ""}`}
-                >
-                  <div>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                      From
-                    </p>
-                    <p className="text-lg font-bold text-primary leading-none">
-                      {formatPrice(course.price)}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    className="rounded-[21px]"
-                    disabled={!available}
-                    onClick={() => available && setBookingCourse(course)}
+                return (
+                  <Card
+                    key={course.id}
+                    className="relative overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300"
+                    style={{ "--card-spacing": "0px" } as React.CSSProperties}
                   >
-                    {available ? "Book Now" : "Coming Soon"}
-                  </Button>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+                    {!available && (
+                      <Badge className="absolute top-3 right-3 z-10 bg-amber-500 text-white border-amber-400">
+                        Coming Soon
+                      </Badge>
+                    )}
+
+                    {/* Gradient image area */}
+                    <div
+                      className={`relative h-40 flex items-center justify-center shrink-0 overflow-hidden ${!course.cardImage ? `bg-linear-to-br ${CATEGORY_GRADIENTS[course.category]}` : ""} ${!available ? "saturate-50" : ""}`}
+                    >
+                      {course.cardImage ? (
+                        <Image
+                          src={course.cardImage}
+                          alt={`${course.title} course image`}
+                          fill
+                          className="object-cover"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 25vw"
+                        />
+                      ) : (
+                        <span className="text-6xl drop-shadow select-none">
+                          {course.emoji}
+                        </span>
+                      )}
+                      <div className="absolute top-3 left-3">
+                        <Badge className="bg-white/25 text-white border-white/30 text-[10px]">
+                          {course.category}
+                        </Badge>
+                      </div>
+                    </div>
+
+                    {/* Body */}
+                    <div
+                      className={`flex flex-col flex-1 px-4 pt-4 pb-0 ${!available ? "opacity-75 blur-[1px]" : ""}`}
+                    >
+                      {dateParts ? (
+                        <div className="mb-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
+                          <div className="flex items-center justify-between gap-3">
+                            <div>
+                              <p className="text-[11px] uppercase tracking-wide text-primary/80 font-semibold">
+                                {dateParts.weekday}
+                              </p>
+                              <p className="text-2xl font-extrabold text-primary leading-none">
+                                {dateParts.day}
+                              </p>
+                              <p className="text-[11px] uppercase tracking-wide text-primary/80 font-semibold mt-0.5">
+                                {dateParts.month}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                Start
+                              </p>
+                              <p className="text-base font-bold text-foreground leading-none mt-1">
+                                {timeLabel ?? "TBC"}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="mb-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5">
+                          <p className="text-sm font-medium text-muted-foreground">Dates to be confirmed</p>
+                        </div>
+                      )}
+
+                      <h3 className="font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
+                        {course.title}
+                      </h3>
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3 shrink-0" />
+                          {course.duration}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users className="w-3 h-3 shrink-0" />
+                          Max {course.maxParticipants}
+                        </span>
+                      </div>
+                      <ScrollArea className="mt-3 h-22 pr-2">
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {course.description}
+                        </p>
+                      </ScrollArea>
+                    </div>
+
+                    {/* Footer */}
+                    <div
+                      className={`flex items-center justify-between px-4 py-3 mt-3 border-t border-border ${!available ? "opacity-80" : ""}`}
+                    >
+                      <div>
+                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                          From
+                        </p>
+                        <p className="text-lg font-bold text-primary leading-none">
+                          {formatPrice(course.price)}
+                        </p>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="rounded-[21px]"
+                        disabled={!available}
+                        onClick={() => available && setBookingCourse(course)}
+                      >
+                        {available ? "Book Now" : "Coming Soon"}
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </section>
+        ))}
       </main>
 
       {/* ── Footer ── */}

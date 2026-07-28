@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
       date,
       participants,
       pricePerPerson,
+      bookingChoiceId,
+      bookingChoiceLabel,
       firstName,
       lastName,
       email,
@@ -71,6 +73,10 @@ export async function POST(req: NextRequest) {
           campus,
           date,
           participants: String(participants),
+          bookingChoiceId: bookingChoiceId ? String(bookingChoiceId) : "",
+          bookingChoiceLabel: bookingChoiceLabel
+            ? String(bookingChoiceLabel)
+            : "",
           customerEmail: email,
           customerName: `${firstName} ${lastName}`,
           clientReferenceId,

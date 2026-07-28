@@ -54,6 +54,9 @@ export function BookingSheet({
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [participants, setParticipants] = useState(1);
+  const [bookingChoiceId, setBookingChoiceId] = useState<string | null>(
+    course?.bookingChoices?.[0]?.id ?? null,
+  );
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -63,10 +66,17 @@ export function BookingSheet({
 
   if (!course) return null;
 
-  const total = course.price * participants;
+  const selectedBookingChoice =
+    course.bookingChoices?.find((choice) => choice.id === bookingChoiceId) ??
+    course.bookingChoices?.[0] ??
+    null;
+  const pricePerPerson = selectedBookingChoice?.price ?? course.price;
+  const total = pricePerPerson * participants;
   const hasDates = course.availableDates.length > 0;
+  const needsChoice = (course.bookingChoices?.length ?? 0) > 0;
   const canBook =
     !!campus &&
+    (!needsChoice || !!selectedBookingChoice) &&
     (!hasDates || !!selectedDate) &&
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
@@ -83,11 +93,15 @@ export function BookingSheet({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           courseId: course!.id,
-          courseTitle: course!.title,
+          courseTitle: selectedBookingChoice
+            ? `${course!.title} (${selectedBookingChoice.label})`
+            : course!.title,
           campus,
           date: selectedDate,
           participants,
-          pricePerPerson: course!.price,
+          pricePerPerson,
+          bookingChoiceId: selectedBookingChoice?.id,
+          bookingChoiceLabel: selectedBookingChoice?.label,
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim(),
@@ -255,6 +269,47 @@ export function BookingSheet({
 
             <Separator />
 
+            {/* ── Booking choice ── */}
+            {needsChoice && (
+              <>
+                <div>
+                  <h3 className="text-sm font-semibold text-foreground mb-3">
+                    Choose Option
+                  </h3>
+                  <div className="grid gap-2">
+                    {course.bookingChoices!.map((choice) => (
+                      <button
+                        key={choice.id}
+                        onClick={() => setBookingChoiceId(choice.id)}
+                        className={cn(
+                          "text-left p-3 rounded-xl border transition-all",
+                          selectedBookingChoice?.id === choice.id
+                            ? "border-primary bg-primary/8"
+                            : "border-border hover:border-primary/50",
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-semibold text-foreground">
+                            {choice.label}
+                          </p>
+                          <p className="text-sm font-bold text-primary">
+                            {formatPrice(choice.price)} pp
+                          </p>
+                        </div>
+                        {choice.note && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {choice.note}
+                          </p>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <Separator />
+              </>
+            )}
+
             {/* ── Participants ── */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">
@@ -381,7 +436,7 @@ export function BookingSheet({
             <div className="bg-muted rounded-xl p-4 space-y-2.5">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {formatPrice(course.price)} &times; {participants}{" "}
+                  {formatPrice(pricePerPerson)} &times; {participants}{" "}
                   {participants === 1 ? "person" : "people"}
                 </span>
                 <span className="font-medium text-foreground">

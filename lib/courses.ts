@@ -70,7 +70,7 @@ export const COURSES: Course[] = [
     ],
     availableDates: ["2026-08-19"],
     maxParticipants: 25,
-    instructor: "Chef Kelly & Chef Franco",
+    instructor: "Chef Kelly  ",
     includes: ["All ingredients", "Tasting portions", "Recipe card"],
     emoji: "🍛",
     cardImage: "/3rdwed.jpeg",
@@ -86,7 +86,7 @@ export const COURSES: Course[] = [
     price: 850,
     availableDates: ["2026-08-29"],
     maxParticipants: 14,
-    instructor: "Chef Kelly, Chef Franco & Chef Potego",
+    instructor: "Chef Kelly,& Chef Potego",
     includes: [
       "All ingredients",
       "Coffee tasting (4 styles)",
@@ -109,7 +109,7 @@ export const COURSES: Course[] = [
     price: 950,
     availableDates: ["2026-09-05"],
     maxParticipants: 12,
-    instructor: "Chef Breyton, Chef Franco & Chef Potego",
+    instructor: "Chef Breyton, & Chef Potego",
     includes: [
       "All ingredients",
       "Chef's apron",
@@ -122,7 +122,7 @@ export const COURSES: Course[] = [
   },
   {
     id: "cooking-club-sep",
-    title: "Cooking Club: Chicken & Mushroom Ravioli",
+    title: "Cooking Club: ",
     category: "Fundamentals",
     description:
       "Join us every third Wednesday for a relaxed evening of cooking, learning and great food. Each month features a brand-new recipe and hands-on experience led by our professional chefs. Come for the cooking, stay for the company",
@@ -166,7 +166,7 @@ export const COURSES: Course[] = [
     price: 750,
     availableDates: ["2026-09-19"],
     maxParticipants: 14,
-    instructor: "Chef Breyton, Chef Kelly & Chef Franco",
+    instructor: "Chef Breyton, Chef Kelly ",
     includes: [
       "All ingredients",
       "Chef's apron",
@@ -230,7 +230,7 @@ export const COURSES: Course[] = [
     price: 950,
     availableDates: ["2026-10-03"],
     maxParticipants: 14,
-    instructor: "Chef Kelly, Chef Franco, Chef Kopano & Chef Potego",
+    instructor: "Chef Kelly, Chef Kopano & Chef Potego",
     includes: [
       "All ingredients",
       "Chef's apron",
@@ -262,21 +262,7 @@ export const COURSES: Course[] = [
     cardImage: "/holiday.jpeg",
     campuses: ["Polokwane"],
   },
-  {
-    id: "cooking-club-oct",
-    title: "Cooking Club: Chicken Parmesana & Goddess Salad",
-    category: "Fundamentals",
-    description:
-      "This month's budget cooking club brings an Italian-American classic to the table — crispy Chicken Parmesana alongside a vibrant Goddess Salad. Hearty, flavourful, and surprisingly affordable.",
-    duration: "Evening (3 hrs)",
-    price: 450,
-    availableDates: ["2026-10-21"],
-    maxParticipants: 25,
-    instructor: "Chef Kelly, Chef Franco & Chef Kopano",
-    includes: ["All ingredients", "Tasting portions", "Recipe card"],
-    emoji: "🍗",
-    campuses: ["Polokwane"],
-  },
+
   {
     id: "halloween-cooking",
     title: "Halloween Dress-Up Party & Cooking",
@@ -320,21 +306,7 @@ export const COURSES: Course[] = [
     cardImage: "/chrismas.jpeg",
     campuses: ["Polokwane"],
   },
-  {
-    id: "cooking-club-nov",
-    title: "Cooking Club: Perfect Pizza",
-    category: "Fundamentals",
-    description:
-      "This month's budget cooking club is all about the perfect pizza. Make proper dough, a rich tomato base, and explore toppings that elevate this classic into something truly special.",
-    duration: "Evening (3 hrs)",
-    price: 450,
-    availableDates: ["2026-11-18"],
-    maxParticipants: 25,
-    instructor: "Chef Kelly, Chef Franco & Chef Kopano",
-    includes: ["All ingredients", "Tasting portions", "Recipe card"],
-    emoji: "🍕",
-    campuses: ["Polokwane"],
-  },
+
   {
     id: "canvas-cakes",
     title: "Canvas Cakes",
@@ -345,7 +317,7 @@ export const COURSES: Course[] = [
     price: 950,
     availableDates: ["2026-11-21"],
     maxParticipants: 14,
-    instructor: "Chef Breyton, Chef Kelly, Chef Franco & Chef Kopano",
+    instructor: "Chef Breyton, Chef Kelly & Chef Kopano",
     includes: [
       "All ingredients",
       "Decorating toolkit",

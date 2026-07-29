@@ -47,22 +47,6 @@ export const COURSES: Course[] = [
   // ── August 2026 ────────────────────────────────────────────────────────────
 
   {
-    id: "lets-go-to-asia",
-    title: "Asian Cooking Class",
-    category: "World Cuisine",
-    description:
-      "A hands-on Asian cooking workshop focused on bold flavours, balanced seasoning, and practical techniques you can recreate at home. ",
-    duration: "Morning (3 hrs)",
-    price: 550,
-    availableDates: ["2026-08-15"],
-    maxParticipants: 20,
-    instructor: "Chef Kelly & Chef Franco",
-    includes: ["All ingredients", "Tasting portions", "Recipe card"],
-    emoji: "🥢",
-    campuses: ["Polokwane"],
-  },
-
-  {
     id: "cooking-club-aug",
     title: "3rd Wednesday Cooking Club: Butter Chicken & Garlic Naan",
     category: "Fundamentals",

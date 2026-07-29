@@ -30,12 +30,10 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 
 // Keep this list updated to control what can be booked right now.
 const CURRENTLY_AVAILABLE_COURSE_IDS = new Set<string>([
-  "lets-go-to-asia", // Asian Cooking Class
   "cooking-club-aug", // 3rd Wednesday Cooking Club
 ]);
 
 const CONFIRMED_TIMES: Record<string, string> = {
-  "lets-go-to-asia": "09:00",
   "cooking-club-aug": "17:30",
 };
 
@@ -73,13 +71,19 @@ export default function ShortCoursesPage() {
     return categoryMatch && campusMatch;
   });
 
-  const groupedByMonth = visible.reduce(
+  const confirmedCourses = visible.filter(
+    (course) => isCourseAvailable(course) && course.availableDates.length > 0,
+  );
+
+  const tbcCourses = visible.filter(
+    (course) => !isCourseAvailable(course) || course.availableDates.length === 0,
+  );
+
+  const groupedConfirmedByMonth = confirmedCourses.reduce(
     (acc, course) => {
       const firstDate = [...course.availableDates].sort()[0];
-      const key = firstDate ? firstDate.slice(0, 7) : "9999-12";
-      const label = firstDate
-        ? getMonthLabel(firstDate)
-        : "Dates To Be Confirmed";
+      const key = firstDate.slice(0, 7);
+      const label = getMonthLabel(firstDate);
 
       if (!acc[key]) {
         acc[key] = { label, courses: [] };
@@ -91,13 +95,23 @@ export default function ShortCoursesPage() {
     {} as Record<string, { label: string; courses: Course[] }>,
   );
 
-  const monthSections = Object.entries(groupedByMonth)
+  const sections = Object.entries(groupedConfirmedByMonth)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([key, value]) => ({
       key,
       label: value.label,
       courses: value.courses,
+      isTbc: false,
     }));
+
+  if (tbcCourses.length > 0) {
+    sections.push({
+      key: "tbc",
+      label: "To Be Confirmed",
+      courses: tbcCourses,
+      isTbc: true,
+    });
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -199,7 +213,7 @@ export default function ShortCoursesPage() {
           ))}
         </div>
 
-        {monthSections.map((section) => (
+        {sections.map((section) => (
           <section key={section.key} className="mb-10 last:mb-0">
             <div className="mb-4 flex items-center gap-3">
               <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
@@ -215,7 +229,7 @@ export default function ShortCoursesPage() {
               {section.courses.map((course) => {
                 const available = isCourseAvailable(course);
                 const nextDate = [...course.availableDates].sort()[0] ?? null;
-                const dateParts = nextDate ? getDateParts(nextDate) : null;
+                const dateParts = !section.isTbc && nextDate ? getDateParts(nextDate) : null;
                 const timeLabel = CONFIRMED_TIMES[course.id];
 
                 return (
@@ -282,6 +296,12 @@ export default function ShortCoursesPage() {
                             </div>
                           </div>
                         </div>
+                      ) : section.isTbc ? (
+                        <div className="mb-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5">
+                          <p className="text-sm font-medium text-muted-foreground">
+                            Schedule to be confirmed
+                          </p>
+                        </div>
                       ) : (
                         <div className="mb-3 rounded-xl border border-border bg-muted/40 px-3 py-2.5">
                           <p className="text-sm font-medium text-muted-foreground">
@@ -314,14 +334,20 @@ export default function ShortCoursesPage() {
                     <div
                       className={`flex items-center justify-between px-4 py-3 mt-3 border-t border-border ${!available ? "opacity-80" : ""}`}
                     >
-                      <div>
-                        <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                          From
+                      {section.isTbc ? (
+                        <p className="text-sm text-muted-foreground">
+                          Pricing to be confirmed
                         </p>
-                        <p className="text-lg font-bold text-primary leading-none">
-                          {formatPrice(course.price)}
-                        </p>
-                      </div>
+                      ) : (
+                        <div>
+                          <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                            From
+                          </p>
+                          <p className="text-lg font-bold text-primary leading-none">
+                            {formatPrice(course.price)}
+                          </p>
+                        </div>
+                      )}
                       <Button
                         size="sm"
                         className="rounded-[21px]"

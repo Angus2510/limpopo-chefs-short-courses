@@ -76,7 +76,8 @@ export default function ShortCoursesPage() {
   );
 
   const tbcCourses = visible.filter(
-    (course) => !isCourseAvailable(course) || course.availableDates.length === 0,
+    (course) =>
+      !isCourseAvailable(course) || course.availableDates.length === 0,
   );
 
   const groupedConfirmedByMonth = confirmedCourses.reduce(
@@ -229,7 +230,8 @@ export default function ShortCoursesPage() {
               {section.courses.map((course) => {
                 const available = isCourseAvailable(course);
                 const nextDate = [...course.availableDates].sort()[0] ?? null;
-                const dateParts = !section.isTbc && nextDate ? getDateParts(nextDate) : null;
+                const dateParts =
+                  !section.isTbc && nextDate ? getDateParts(nextDate) : null;
                 const timeLabel = CONFIRMED_TIMES[course.id];
 
                 return (

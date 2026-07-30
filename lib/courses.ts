@@ -22,6 +22,7 @@ export interface Course {
     label: string;
     price: number;
     maxParticipants?: number;
+    timeLabel?: string;
     note?: string;
   }>;
   availableDates: string[]; // ISO: YYYY-MM-DD — empty means TBC
@@ -52,7 +53,7 @@ export const COURSES: Course[] = [
     title: "3rd Wednesday Cooking Club: Butter Chicken & Garlic Naan",
     category: "Fundamentals",
     description:
-      "Our monthly budget cooking club — this session tackles a crowd favourite. Make a rich, aromatic Butter Chicken from scratch, served with freshly made Garlic Naan, all on a budget.",
+      "Join us every month for our Budget Cooking Club. Each month, you’ll learn a new recipe, pick up new cooking skills, and enjoy a fun evening with fellow food lovers. This month’s menu is Butter Chicken served with homemade naan made from scratch. No time to cook? No problem. Simply place your order, collect your meal, and enjoy a freshly prepared homemade dinner without the effort.",
     duration: "Evening (3 hrs)",
     price: 200,
     bookingChoices: [
@@ -60,7 +61,8 @@ export const COURSES: Course[] = [
         id: "cook-with-class",
         label: "Cook with class",
         price: 275,
-        maxParticipants: 18,
+        maxParticipants: 15,
+        timeLabel: "Starts at 17:30",
         note: "Hands-on cooking session",
       },
       {
@@ -68,6 +70,7 @@ export const COURSES: Course[] = [
         label: "Takeaway order",
         price: 200,
         maxParticipants: 50,
+        timeLabel: "Available from 19:30",
         note: "Order for collection",
       },
     ],

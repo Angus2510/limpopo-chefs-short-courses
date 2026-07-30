@@ -77,7 +77,9 @@ export function BookingSheet({
     course?.bookingChoices?.find((choice) => choice.id === bookingChoiceId) ??
     course?.bookingChoices?.[0] ??
     null;
-  const pricePerPerson = Number(selectedBookingChoice?.price ?? course?.price ?? 0);
+  const pricePerPerson = Number(
+    selectedBookingChoice?.price ?? course?.price ?? 0,
+  );
   const safePricePerPerson = Number.isFinite(pricePerPerson)
     ? pricePerPerson
     : 0;
@@ -239,7 +241,7 @@ export function BookingSheet({
             </Badge>
             <Badge className="bg-white/20 text-white border-white/30 text-[10px] flex items-center gap-1">
               <Users className="w-2.5 h-2.5" />
-              {selectedRemaining} left
+              {selectedRemaining} spots left
             </Badge>
           </div>
         </div>
@@ -354,18 +356,21 @@ export function BookingSheet({
                               {formatPrice(choice.price)} pp
                             </p>
                             <p className="text-[11px] text-muted-foreground">
-                              {
-                                availability?.choiceRemaining?.[choice.id] ??
+                              {availability?.choiceRemaining?.[choice.id] ??
                                 choice.maxParticipants ??
-                                activeCourse.maxParticipants
-                              }{" "}
-                              left
+                                activeCourse.maxParticipants}{" "}
+                              spots left
                             </p>
                           </div>
                         </div>
                         {choice.note && (
                           <p className="text-xs text-muted-foreground mt-1">
                             {choice.note}
+                          </p>
+                        )}
+                        {choice.timeLabel && (
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {choice.timeLabel}
                           </p>
                         )}
                       </button>
@@ -400,17 +405,17 @@ export function BookingSheet({
                 </div>
                 <button
                   onClick={() =>
-                    setParticipants((p) =>
-                      Math.min(selectedRemaining, p + 1),
-                    )
+                    setParticipants((p) => Math.min(selectedRemaining, p + 1))
                   }
-                  disabled={participants >= selectedRemaining || selectedRemaining === 0}
+                  disabled={
+                    participants >= selectedRemaining || selectedRemaining === 0
+                  }
                   className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
                 <span className="text-xs text-muted-foreground">
-                  ({selectedRemaining} remaining)
+                  ({selectedRemaining} spots left)
                 </span>
               </div>
               {selectedRemaining === 0 && (
@@ -419,7 +424,9 @@ export function BookingSheet({
                 </p>
               )}
               {availabilityLoading && (
-                <p className="text-xs text-muted-foreground mt-2">Checking availability...</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Checking availability...
+                </p>
               )}
             </div>
 

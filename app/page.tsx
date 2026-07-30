@@ -256,6 +256,10 @@ export default function ShortCoursesPage() {
                   !section.isTbc && nextDate ? getDateParts(nextDate) : null;
                 const timeLabel = CONFIRMED_TIMES[course.id];
                 const courseAvailability = availability[course.id];
+                const choiceTimeText = course.bookingChoices
+                  ?.filter((choice) => choice.timeLabel)
+                  .map((choice) => `${choice.label}: ${choice.timeLabel}`)
+                  .join(" · ");
                 const remainingText = course.bookingChoices?.length
                   ? course.bookingChoices
                       .map((choice) => {
@@ -263,10 +267,10 @@ export default function ShortCoursesPage() {
                           courseAvailability?.choiceRemaining?.[choice.id] ??
                           choice.maxParticipants ??
                           course.maxParticipants;
-                        return `${choice.label}: ${remaining} left`;
+                        return `${choice.label}: ${remaining} spots left`;
                       })
                       .join(" · ")
-                  : `${courseAvailability?.remaining ?? course.maxParticipants} left`;
+                  : `${courseAvailability?.remaining ?? course.maxParticipants} spots left`;
 
                 return (
                   <Card
@@ -318,12 +322,25 @@ export default function ShortCoursesPage() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                                Start
-                              </p>
-                              <p className="text-base font-bold text-foreground leading-none mt-1">
-                                {timeLabel ?? "TBC"}
-                              </p>
+                              {choiceTimeText ? (
+                                <>
+                                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                    Times
+                                  </p>
+                                  <p className="text-[11px] font-medium text-foreground leading-snug mt-1 max-w-37.5">
+                                    {choiceTimeText}
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
+                                    Start
+                                  </p>
+                                  <p className="text-base font-bold text-foreground leading-none mt-1">
+                                    {timeLabel ?? "TBC"}
+                                  </p>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -357,7 +374,7 @@ export default function ShortCoursesPage() {
                         ) : (
                           <span className="flex items-center gap-1">
                             <Users className="w-3 h-3 shrink-0" />
-                            Max {course.maxParticipants}
+                            {course.maxParticipants} spots left
                           </span>
                         )}
                       </div>

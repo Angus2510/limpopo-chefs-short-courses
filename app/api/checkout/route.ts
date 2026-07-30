@@ -64,7 +64,9 @@ export async function POST(req: NextRequest) {
 
     const normalizedChoiceId = bookingChoiceId ? String(bookingChoiceId) : null;
     const selectedChoice = normalizedChoiceId
-      ? course.bookingChoices?.find((choice) => choice.id === normalizedChoiceId)
+      ? course.bookingChoices?.find(
+          (choice) => choice.id === normalizedChoiceId,
+        )
       : null;
 
     if (normalizedChoiceId && !selectedChoice) {

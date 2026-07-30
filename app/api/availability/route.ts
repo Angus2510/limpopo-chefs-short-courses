@@ -42,10 +42,15 @@ export async function GET() {
       for (const choice of course.bookingChoices) {
         const choiceCapacity = choice.maxParticipants ?? course.maxParticipants;
         const paidForChoice = bookingsForCourse
-          .filter((booking) => booking.courseTitle.includes(`(${choice.label})`))
+          .filter((booking) =>
+            booking.courseTitle.includes(`(${choice.label})`),
+          )
           .reduce((sum, booking) => sum + booking.participants, 0);
 
-        choiceRemaining[choice.id] = Math.max(choiceCapacity - paidForChoice, 0);
+        choiceRemaining[choice.id] = Math.max(
+          choiceCapacity - paidForChoice,
+          0,
+        );
       }
 
       courseAvailability.choiceRemaining = choiceRemaining;

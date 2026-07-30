@@ -21,6 +21,7 @@ export interface Course {
     id: string;
     label: string;
     price: number;
+    maxParticipants?: number;
     note?: string;
   }>;
   availableDates: string[]; // ISO: YYYY-MM-DD — empty means TBC
@@ -59,17 +60,19 @@ export const COURSES: Course[] = [
         id: "cook-with-class",
         label: "Cook with class",
         price: 275,
+        maxParticipants: 18,
         note: "Hands-on cooking session",
       },
       {
         id: "takeaway",
         label: "Takeaway order",
         price: 200,
+        maxParticipants: 50,
         note: "Order for collection",
       },
     ],
     availableDates: ["2026-08-19"],
-    maxParticipants: 18,
+    maxParticipants: 15,
     instructor: "Chef Kelly  ",
     includes: ["All ingredients", "Tasting portions", "Recipe card"],
     emoji: "🍛",

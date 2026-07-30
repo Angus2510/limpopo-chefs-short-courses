@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -63,9 +63,42 @@ function getDateParts(dateStr: string) {
   };
 }
 
+type AvailabilityMap = Record<
+  string,
+  {
+    remaining: number;
+    choiceRemaining?: Record<string, number>;
+  }
+>;
+
 export default function ShortCoursesPage() {
   const [activeCampus, setActiveCampus] = useState<Campus | "All">("All");
   const [bookingCourse, setBookingCourse] = useState<Course | null>(null);
+  const [availability, setAvailability] = useState<AvailabilityMap>({});
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadAvailability() {
+      try {
+        const res = await fetch("/api/availability", { cache: "no-store" });
+        if (!res.ok) return;
+
+        const data = (await res.json()) as { availability?: AvailabilityMap };
+        if (mounted && data.availability) {
+          setAvailability(data.availability);
+        }
+      } catch {
+        // Keep static fallback values when the availability endpoint is not reachable.
+      }
+    }
+
+    loadAvailability();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const visible = COURSES.filter((c) => {
     const campusMatch =
@@ -222,6 +255,18 @@ export default function ShortCoursesPage() {
                 const dateParts =
                   !section.isTbc && nextDate ? getDateParts(nextDate) : null;
                 const timeLabel = CONFIRMED_TIMES[course.id];
+                const courseAvailability = availability[course.id];
+                const remainingText = course.bookingChoices?.length
+                  ? course.bookingChoices
+                      .map((choice) => {
+                        const remaining =
+                          courseAvailability?.choiceRemaining?.[choice.id] ??
+                          choice.maxParticipants ??
+                          course.maxParticipants;
+                        return `${choice.label}: ${remaining} left`;
+                      })
+                      .join(" · ")
+                  : `${courseAvailability?.remaining ?? course.maxParticipants} left`;
 
                 return (
                   <Card
@@ -304,10 +349,17 @@ export default function ShortCoursesPage() {
                           <Clock className="w-3 h-3 shrink-0" />
                           {course.duration}
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Users className="w-3 h-3 shrink-0" />
-                          Max {course.maxParticipants}
-                        </span>
+                        {available ? (
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3 shrink-0" />
+                            {remainingText}
+                          </span>
+                        ) : (
+                          <span className="flex items-center gap-1">
+                            <Users className="w-3 h-3 shrink-0" />
+                            Max {course.maxParticipants}
+                          </span>
+                        )}
                       </div>
                       <ScrollArea className="mt-3 h-22 pr-2">
                         <p className="text-sm text-muted-foreground leading-relaxed">

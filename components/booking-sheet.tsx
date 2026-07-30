@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import {
   Sheet,
@@ -38,6 +38,11 @@ interface BookingSheetProps {
   defaultCampus?: Campus | null;
 }
 
+type CourseAvailability = {
+  remaining: number;
+  choiceRemaining?: Record<string, number>;
+};
+
 const INPUT =
   "w-full h-9 px-3 text-sm rounded-lg border border-border bg-background placeholder:text-muted-foreground/50 focus:outline-none focus:ring-1 focus:ring-primary transition-shadow";
 
@@ -61,30 +66,84 @@ export function BookingSheet({
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availability, setAvailability] = useState<CourseAvailability | null>(
+    null,
+  );
   const [error, setError] = useState<string | null>(null);
-
-  if (!course) return null;
+  const courseId = course?.id;
 
   const selectedBookingChoice =
-    course.bookingChoices?.find((choice) => choice.id === bookingChoiceId) ??
-    course.bookingChoices?.[0] ??
+    course?.bookingChoices?.find((choice) => choice.id === bookingChoiceId) ??
+    course?.bookingChoices?.[0] ??
     null;
-  const pricePerPerson = Number(selectedBookingChoice?.price ?? course.price);
+  const pricePerPerson = Number(selectedBookingChoice?.price ?? course?.price ?? 0);
   const safePricePerPerson = Number.isFinite(pricePerPerson)
     ? pricePerPerson
     : 0;
   const safeParticipants = Number.isFinite(participants) ? participants : 1;
   const total = safePricePerPerson * safeParticipants;
-  const hasDates = course.availableDates.length > 0;
-  const needsChoice = (course.bookingChoices?.length ?? 0) > 0;
+  const selectedCapacity =
+    selectedBookingChoice?.maxParticipants ?? course?.maxParticipants ?? 0;
+  const selectedRemaining = Math.max(
+    availability
+      ? selectedBookingChoice
+        ? (availability.choiceRemaining?.[selectedBookingChoice.id] ??
+          selectedCapacity)
+        : availability.remaining
+      : selectedCapacity,
+    0,
+  );
+  const hasDates = (course?.availableDates.length ?? 0) > 0;
+  const needsChoice = (course?.bookingChoices?.length ?? 0) > 0;
   const canBook =
+    !!course &&
     !!campus &&
     (!needsChoice || !!selectedBookingChoice) &&
+    selectedRemaining > 0 &&
+    participants <= selectedRemaining &&
     (!hasDates || !!selectedDate) &&
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
     phone.trim().length > 0;
+
+  useEffect(() => {
+    const currentCourseId = courseId;
+    if (!open || !currentCourseId) return;
+    const courseKey: string = currentCourseId;
+
+    let mounted = true;
+
+    async function loadAvailability() {
+      setAvailabilityLoading(true);
+      try {
+        const res = await fetch("/api/availability", { cache: "no-store" });
+        if (!res.ok) return;
+
+        const data = (await res.json()) as {
+          availability?: Record<string, CourseAvailability>;
+        };
+
+        if (mounted) {
+          setAvailability(data.availability?.[courseKey] ?? null);
+        }
+      } catch {
+        if (mounted) setAvailability(null);
+      } finally {
+        if (mounted) setAvailabilityLoading(false);
+      }
+    }
+
+    loadAvailability();
+
+    return () => {
+      mounted = false;
+    };
+  }, [open, courseId]);
+
+  if (!course) return null;
+  const activeCourse = course;
 
   async function handleBook() {
     if (!canBook || loading) return;
@@ -96,10 +155,10 @@ export function BookingSheet({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          courseId: course!.id,
+          courseId: course.id,
           courseTitle: selectedBookingChoice
-            ? `${course!.title} (${selectedBookingChoice.label})`
-            : course!.title,
+            ? `${course.title} (${selectedBookingChoice.label})`
+            : course.title,
           campus,
           date: selectedDate,
           participants,
@@ -151,11 +210,11 @@ export function BookingSheet({
             <span className="sr-only">Close</span>
           </SheetClose>
 
-          {course.cardImage ? (
+          {activeCourse.cardImage ? (
             <div className="relative w-full h-28 mb-3 rounded-xl overflow-hidden bg-white/15 ring-1 ring-white/25">
               <Image
-                src={course.cardImage}
-                alt={`${course.title} image`}
+                src={activeCourse.cardImage}
+                alt={`${activeCourse.title} image`}
                 fill
                 className="object-cover"
                 sizes="(max-width: 640px) 100vw, 420px"
@@ -163,24 +222,24 @@ export function BookingSheet({
             </div>
           ) : (
             <div className="text-5xl mb-3 leading-none select-none">
-              {course.emoji}
+              {activeCourse.emoji}
             </div>
           )}
 
           <SheetHeader className="p-0 gap-0.5">
             <SheetTitle className="text-white text-xl font-bold leading-snug">
-              {course.title}
+              {activeCourse.title}
             </SheetTitle>
           </SheetHeader>
 
           <div className="flex flex-wrap gap-1.5 mt-3">
             <Badge className="bg-white/20 text-white border-white/30 text-[10px] flex items-center gap-1">
               <Clock className="w-2.5 h-2.5" />
-              {course.duration}
+              {activeCourse.duration}
             </Badge>
             <Badge className="bg-white/20 text-white border-white/30 text-[10px] flex items-center gap-1">
               <Users className="w-2.5 h-2.5" />
-              Max {course.maxParticipants}
+              {selectedRemaining} left
             </Badge>
           </div>
         </div>
@@ -189,7 +248,7 @@ export function BookingSheet({
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="p-5 space-y-5">
             <p className="text-sm text-muted-foreground leading-relaxed">
-              {course.description}
+              {activeCourse.description}
             </p>
 
             <Separator />
@@ -201,8 +260,8 @@ export function BookingSheet({
                 Select Campus
               </h3>
               <div className="grid grid-cols-2 gap-2">
-                {(course.campuses.length > 0
-                  ? course.campuses
+                {(activeCourse.campuses.length > 0
+                  ? activeCourse.campuses
                   : (["Mokopane", "Polokwane"] as Campus[])
                 ).map((c) => (
                   <button
@@ -229,7 +288,7 @@ export function BookingSheet({
               <h3 className="text-sm font-semibold text-foreground mb-3">
                 Choose a Date
               </h3>
-              {course.availableDates.length === 0 ? (
+              {activeCourse.availableDates.length === 0 ? (
                 <div className="bg-muted rounded-lg p-4 text-center space-y-1">
                   <p className="text-sm font-medium text-foreground">
                     Dates to be confirmed
@@ -247,7 +306,7 @@ export function BookingSheet({
                 </div>
               ) : (
                 <div className="grid grid-cols-2 gap-2">
-                  {course.availableDates.map((date) => (
+                  {activeCourse.availableDates.map((date) => (
                     <button
                       key={date}
                       onClick={() => setSelectedDate(date)}
@@ -275,7 +334,7 @@ export function BookingSheet({
                     Choose Option
                   </h3>
                   <div className="grid gap-2">
-                    {course.bookingChoices!.map((choice) => (
+                    {activeCourse.bookingChoices!.map((choice) => (
                       <button
                         key={choice.id}
                         onClick={() => setBookingChoiceId(choice.id)}
@@ -290,9 +349,19 @@ export function BookingSheet({
                           <p className="text-sm font-semibold text-foreground">
                             {choice.label}
                           </p>
-                          <p className="text-sm font-bold text-primary">
-                            {formatPrice(choice.price)} pp
-                          </p>
+                          <div className="text-right">
+                            <p className="text-sm font-bold text-primary">
+                              {formatPrice(choice.price)} pp
+                            </p>
+                            <p className="text-[11px] text-muted-foreground">
+                              {
+                                availability?.choiceRemaining?.[choice.id] ??
+                                choice.maxParticipants ??
+                                activeCourse.maxParticipants
+                              }{" "}
+                              left
+                            </p>
+                          </div>
                         </div>
                         {choice.note && (
                           <p className="text-xs text-muted-foreground mt-1">
@@ -332,18 +401,26 @@ export function BookingSheet({
                 <button
                   onClick={() =>
                     setParticipants((p) =>
-                      Math.min(course.maxParticipants, p + 1),
+                      Math.min(selectedRemaining, p + 1),
                     )
                   }
-                  disabled={participants >= course.maxParticipants}
+                  disabled={participants >= selectedRemaining || selectedRemaining === 0}
                   className="w-9 h-9 rounded-full border border-border flex items-center justify-center hover:border-primary hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                   <Plus className="w-4 h-4" />
                 </button>
                 <span className="text-xs text-muted-foreground">
-                  (max {course.maxParticipants})
+                  ({selectedRemaining} remaining)
                 </span>
               </div>
+              {selectedRemaining === 0 && (
+                <p className="text-xs text-destructive mt-2">
+                  This option is sold out.
+                </p>
+              )}
+              {availabilityLoading && (
+                <p className="text-xs text-muted-foreground mt-2">Checking availability...</p>
+              )}
             </div>
 
             <Separator />
@@ -414,7 +491,7 @@ export function BookingSheet({
                 What&apos;s Included
               </h3>
               <ul className="space-y-2">
-                {course.includes.map((item, i) => (
+                {activeCourse.includes.map((item, i) => (
                   <li
                     key={i}
                     className="flex items-center gap-2 text-sm text-muted-foreground"

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { COURSES } from "@/lib/courses";
 import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -56,6 +57,54 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const course = COURSES.find((item) => item.id === String(courseId));
+    if (!course) {
+      return NextResponse.json({ error: "Invalid course" }, { status: 400 });
+    }
+
+    const normalizedChoiceId = bookingChoiceId ? String(bookingChoiceId) : null;
+    const selectedChoice = normalizedChoiceId
+      ? course.bookingChoices?.find((choice) => choice.id === normalizedChoiceId)
+      : null;
+
+    if (normalizedChoiceId && !selectedChoice) {
+      return NextResponse.json(
+        { error: "Invalid booking option" },
+        { status: 400 },
+      );
+    }
+
+    const capacity = selectedChoice?.maxParticipants ?? course.maxParticipants;
+    const paidCount = await prisma.booking.aggregate({
+      _sum: { participants: true },
+      where: {
+        courseId: String(courseId),
+        status: "paid",
+        ...(selectedChoice
+          ? { courseTitle: { contains: `(${selectedChoice.label})` } }
+          : {}),
+      },
+    });
+
+    const alreadyPaid = paidCount._sum.participants ?? 0;
+    const remaining = Math.max(capacity - alreadyPaid, 0);
+
+    if (participantsNumber > remaining) {
+      return NextResponse.json(
+        {
+          error:
+            remaining > 0
+              ? `Only ${remaining} spot(s) left for this option.`
+              : "This option is sold out.",
+        },
+        { status: 409 },
+      );
+    }
+
+    const sanitizedCourseTitle = selectedChoice
+      ? `${course.title} (${selectedChoice.label})`
+      : course.title;
+
     const amountInCents = Math.round(
       pricePerPersonNumber * participantsNumber * 100,
     );
@@ -78,22 +127,20 @@ export async function POST(req: NextRequest) {
         failureUrl: `${baseUrl}/payment/cancelled`,
         metadata: {
           courseId,
-          courseTitle,
+          courseTitle: sanitizedCourseTitle,
           campus,
           date,
-          participants: String(participants),
+          participants: String(participantsNumber),
           bookingChoiceId: bookingChoiceId ? String(bookingChoiceId) : "",
-          bookingChoiceLabel: bookingChoiceLabel
-            ? String(bookingChoiceLabel)
-            : "",
+          bookingChoiceLabel: selectedChoice?.label ?? "",
           customerEmail: email,
           customerName: `${firstName} ${lastName}`,
           clientReferenceId,
         },
         lineItems: [
           {
-            displayName: courseTitle,
-            quantity: Number(participants),
+            displayName: sanitizedCourseTitle,
+            quantity: participantsNumber,
             pricingDetails: { price: Math.round(pricePerPersonNumber * 100) },
             description: `${campus} Campus · ${date}`,
           },
@@ -121,7 +168,7 @@ export async function POST(req: NextRequest) {
         email: String(email).trim().toLowerCase(),
         phone: String(phone).trim(),
         courseId: String(courseId),
-        courseTitle: String(courseTitle),
+        courseTitle: sanitizedCourseTitle,
         campus: String(campus),
         date: String(date),
         participants: participantsNumber,

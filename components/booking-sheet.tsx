@@ -70,7 +70,9 @@ export function BookingSheet({
     course.bookingChoices?.[0] ??
     null;
   const pricePerPerson = Number(selectedBookingChoice?.price ?? course.price);
-  const safePricePerPerson = Number.isFinite(pricePerPerson) ? pricePerPerson : 0;
+  const safePricePerPerson = Number.isFinite(pricePerPerson)
+    ? pricePerPerson
+    : 0;
   const safeParticipants = Number.isFinite(participants) ? participants : 1;
   const total = safePricePerPerson * safeParticipants;
   const hasDates = course.availableDates.length > 0;

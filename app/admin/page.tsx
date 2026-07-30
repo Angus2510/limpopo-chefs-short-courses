@@ -25,7 +25,8 @@ export default function AdminBookingsPage() {
 
   const peoplePerCourse = bookings.reduce(
     (acc, booking) => {
-      acc[booking.courseTitle] = (acc[booking.courseTitle] ?? 0) + booking.participants;
+      acc[booking.courseTitle] =
+        (acc[booking.courseTitle] ?? 0) + booking.participants;
       return acc;
     },
     {} as Record<string, number>,
@@ -195,7 +196,9 @@ export default function AdminBookingsPage() {
       <header className="border-b border-border bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div>
-            <h1 className="text-lg font-bold text-foreground">Admin Bookings</h1>
+            <h1 className="text-lg font-bold text-foreground">
+              Admin Bookings
+            </h1>
             <p className="text-xs text-muted-foreground">
               Course booked, paid status, email, and phone details.
             </p>
@@ -234,15 +237,22 @@ export default function AdminBookingsPage() {
             <tbody>
               {coursePeopleRows.length === 0 ? (
                 <tr>
-                  <td colSpan={2} className="px-4 py-6 text-center text-muted-foreground">
+                  <td
+                    colSpan={2}
+                    className="px-4 py-6 text-center text-muted-foreground"
+                  >
                     No bookings yet.
                   </td>
                 </tr>
               ) : (
                 coursePeopleRows.map((row) => (
                   <tr key={row.courseTitle} className="border-t border-border">
-                    <td className="px-4 py-3 font-medium text-foreground">{row.courseTitle}</td>
-                    <td className="px-4 py-3 text-foreground">{row.peopleCount}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {row.courseTitle}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      {row.peopleCount}
+                    </td>
                   </tr>
                 ))
               )}
@@ -265,15 +275,22 @@ export default function AdminBookingsPage() {
             <tbody>
               {bookings.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                  <td
+                    colSpan={6}
+                    className="px-4 py-8 text-center text-muted-foreground"
+                  >
                     No bookings yet.
                   </td>
                 </tr>
               ) : (
                 bookings.map((booking) => (
                   <tr key={booking.id} className="border-t border-border">
-                    <td className="px-4 py-3 font-medium text-foreground">{booking.courseTitle}</td>
-                    <td className="px-4 py-3 text-foreground">{booking.participants}</td>
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {booking.courseTitle}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      {booking.participants}
+                    </td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
@@ -285,8 +302,12 @@ export default function AdminBookingsPage() {
                         {booking.paid ? "Yes" : "No"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-foreground">{booking.email}</td>
-                    <td className="px-4 py-3 text-foreground">{booking.phone ?? "-"}</td>
+                    <td className="px-4 py-3 text-foreground">
+                      {booking.email}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      {booking.phone ?? "-"}
+                    </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {new Date(booking.createdAt).toLocaleDateString("en-ZA")}
                     </td>

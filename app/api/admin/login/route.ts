@@ -12,7 +12,10 @@ export async function POST(req: NextRequest) {
     const password = String(body.password ?? "");
 
     if (!verifyAdminCredentials(username, password)) {
-      return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid credentials" },
+        { status: 401 },
+      );
     }
 
     const res = NextResponse.json({ ok: true });

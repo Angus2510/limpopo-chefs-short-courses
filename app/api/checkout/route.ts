@@ -56,7 +56,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const amountInCents = Math.round(pricePerPersonNumber * participantsNumber * 100);
+    const amountInCents = Math.round(
+      pricePerPersonNumber * participantsNumber * 100,
+    );
     const clientReferenceId = randomUUID();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 

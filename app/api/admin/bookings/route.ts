@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
     select: {
       id: true,
       courseTitle: true,
+      campus: true,
       status: true,
       email: true,
       phone: true,
@@ -26,6 +27,7 @@ export async function GET(req: NextRequest) {
     bookings: bookings.map((booking) => ({
       id: booking.id,
       courseTitle: booking.courseTitle,
+      campus: booking.campus,
       paid: booking.status === "paid",
       email: booking.email,
       phone: booking.phone,

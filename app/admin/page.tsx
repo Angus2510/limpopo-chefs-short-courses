@@ -7,6 +7,7 @@ import Link from "next/link";
 type BookingRow = {
   id: string;
   courseTitle: string;
+  campus: string;
   paid: boolean;
   email: string;
   phone: string | null;
@@ -23,18 +24,32 @@ export default function AdminBookingsPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const peoplePerCourse = bookings.reduce(
+  const peoplePerCourseAndCampus = bookings.reduce(
     (acc, booking) => {
-      acc[booking.courseTitle] =
-        (acc[booking.courseTitle] ?? 0) + booking.participants;
+      const current = acc[booking.courseTitle] ?? { Mokopane: 0, Polokwane: 0 };
+      const campusKey =
+        booking.campus === "Mokopane" ? "Mokopane" : "Polokwane";
+
+      acc[booking.courseTitle] = {
+        ...current,
+        [campusKey]: current[campusKey] + booking.participants,
+      };
+
       return acc;
     },
-    {} as Record<string, number>,
+    {} as Record<string, { Mokopane: number; Polokwane: number }>,
   );
 
-  const coursePeopleRows = Object.entries(peoplePerCourse)
-    .sort((a, b) => b[1] - a[1])
-    .map(([courseTitle, peopleCount]) => ({ courseTitle, peopleCount }));
+  const coursePeopleRows = Object.entries(peoplePerCourseAndCampus)
+    .sort(
+      ([, a], [, b]) => b.Mokopane + b.Polokwane - (a.Mokopane + a.Polokwane),
+    )
+    .map(([courseTitle, campuses]) => ({
+      courseTitle,
+      mokopaneCount: campuses.Mokopane,
+      polokwaneCount: campuses.Polokwane,
+      totalCount: campuses.Mokopane + campuses.Polokwane,
+    }));
 
   async function loadBookings() {
     const res = await fetch("/api/admin/bookings", { cache: "no-store" });
@@ -231,14 +246,16 @@ export default function AdminBookingsPage() {
             <thead className="bg-muted/50">
               <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 py-3">Course</th>
-                <th className="px-4 py-3">People Booked</th>
+                <th className="px-4 py-3">Mokopane</th>
+                <th className="px-4 py-3">Polokwane</th>
+                <th className="px-4 py-3">Total</th>
               </tr>
             </thead>
             <tbody>
               {coursePeopleRows.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={2}
+                    colSpan={4}
                     className="px-4 py-6 text-center text-muted-foreground"
                   >
                     No bookings yet.
@@ -251,7 +268,13 @@ export default function AdminBookingsPage() {
                       {row.courseTitle}
                     </td>
                     <td className="px-4 py-3 text-foreground">
-                      {row.peopleCount}
+                      {row.mokopaneCount}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      {row.polokwaneCount}
+                    </td>
+                    <td className="px-4 py-3 text-foreground font-medium">
+                      {row.totalCount}
                     </td>
                   </tr>
                 ))
@@ -265,6 +288,7 @@ export default function AdminBookingsPage() {
             <thead className="bg-muted/50">
               <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 py-3">Course Booked</th>
+                <th className="px-4 py-3">Campus</th>
                 <th className="px-4 py-3">People</th>
                 <th className="px-4 py-3">Paid</th>
                 <th className="px-4 py-3">Email</th>
@@ -276,7 +300,7 @@ export default function AdminBookingsPage() {
               {bookings.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
                     No bookings yet.
@@ -287,6 +311,9 @@ export default function AdminBookingsPage() {
                   <tr key={booking.id} className="border-t border-border">
                     <td className="px-4 py-3 font-medium text-foreground">
                       {booking.courseTitle}
+                    </td>
+                    <td className="px-4 py-3 text-foreground">
+                      {booking.campus}
                     </td>
                     <td className="px-4 py-3 text-foreground">
                       {booking.participants}

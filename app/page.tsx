@@ -15,7 +15,14 @@ import {
   type Course,
   type Campus,
 } from "@/lib/courses";
-import { ChefHat, Clock, MapPin, MessageCircle, Phone, Users } from "lucide-react";
+import {
+  ChefHat,
+  Clock,
+  MapPin,
+  MessageCircle,
+  Phone,
+  Users,
+} from "lucide-react";
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   Fundamentals: "from-[#315631] to-[#1e3d1e]",
@@ -150,6 +157,12 @@ export default function ShortCoursesPage() {
               className="text-muted-foreground hover:text-primary transition-colors"
             >
               Contact
+            </a>
+            <a
+              href="/admin"
+              className="text-muted-foreground hover:text-primary transition-colors"
+            >
+              Admin
             </a>
           </nav>
 
@@ -383,8 +396,8 @@ export default function ShortCoursesPage() {
                   <MessageCircle className="w-3 h-3 shrink-0" /> 066 245 0458
                 </p>
                 <p className="flex items-center gap-2">
-                  <MapPin className="w-3 h-3 shrink-0" /> 22 Hans van Rensburg Street,
-                  Polokwane 0699
+                  <MapPin className="w-3 h-3 shrink-0" /> 22 Hans van Rensburg
+                  Street, Polokwane 0699
                 </p>
               </div>
             </div>

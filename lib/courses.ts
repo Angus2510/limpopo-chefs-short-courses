@@ -354,7 +354,12 @@ export const COURSES: Course[] = [
 ];
 
 export function formatPrice(amount: number): string {
-  return `R ${amount.toLocaleString("en-ZA")}`;
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount)) {
+    return "TBC";
+  }
+
+  return `R ${numericAmount.toLocaleString("en-ZA")}`;
 }
 
 export function formatDate(dateStr: string): string {

@@ -30,13 +30,21 @@ export async function POST(req: NextRequest) {
       phone,
     } = body;
 
+    const participantsNumber = Number(participants);
+    const pricePerPersonNumber = Number(pricePerPerson);
+
+    const hasValidNumbers =
+      Number.isFinite(participantsNumber) &&
+      participantsNumber > 0 &&
+      Number.isFinite(pricePerPersonNumber) &&
+      pricePerPersonNumber > 0;
+
     if (
       !courseId ||
       !courseTitle ||
       !campus ||
       !date ||
-      !participants ||
-      !pricePerPerson ||
+      !hasValidNumbers ||
       !firstName ||
       !lastName ||
       !email ||
@@ -48,9 +56,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const amountInCents = Math.round(
-      Number(pricePerPerson) * Number(participants) * 100,
-    );
+    const amountInCents = Math.round(pricePerPersonNumber * participantsNumber * 100);
     const clientReferenceId = randomUUID();
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
@@ -86,7 +92,7 @@ export async function POST(req: NextRequest) {
           {
             displayName: courseTitle,
             quantity: Number(participants),
-            pricingDetails: { price: Math.round(Number(pricePerPerson) * 100) },
+            pricingDetails: { price: Math.round(pricePerPersonNumber * 100) },
             description: `${campus} Campus · ${date}`,
           },
         ],
@@ -116,7 +122,7 @@ export async function POST(req: NextRequest) {
         courseTitle: String(courseTitle),
         campus: String(campus),
         date: String(date),
-        participants: Number(participants),
+        participants: participantsNumber,
         amount: amountInCents,
         currency: "ZAR",
         status: "pending",

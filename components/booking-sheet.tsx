@@ -69,8 +69,10 @@ export function BookingSheet({
     course.bookingChoices?.find((choice) => choice.id === bookingChoiceId) ??
     course.bookingChoices?.[0] ??
     null;
-  const pricePerPerson = selectedBookingChoice?.price ?? course.price;
-  const total = pricePerPerson * participants;
+  const pricePerPerson = Number(selectedBookingChoice?.price ?? course.price);
+  const safePricePerPerson = Number.isFinite(pricePerPerson) ? pricePerPerson : 0;
+  const safeParticipants = Number.isFinite(participants) ? participants : 1;
+  const total = safePricePerPerson * safeParticipants;
   const hasDates = course.availableDates.length > 0;
   const needsChoice = (course.bookingChoices?.length ?? 0) > 0;
   const canBook =
@@ -99,7 +101,7 @@ export function BookingSheet({
           campus,
           date: selectedDate,
           participants,
-          pricePerPerson,
+          pricePerPerson: safePricePerPerson,
           bookingChoiceId: selectedBookingChoice?.id,
           bookingChoiceLabel: selectedBookingChoice?.label,
           firstName: firstName.trim(),

@@ -70,7 +70,7 @@ export const COURSES: Course[] = [
         label: "Takeaway order",
         price: 200,
         maxParticipants: 50,
-        timeLabel: "Available from 19:30",
+        timeLabel: "Collection between 19:30 -20:30",
         note: "Order for collection",
       },
     ],
@@ -80,7 +80,7 @@ export const COURSES: Course[] = [
     includes: ["All ingredients", "Tasting portions", "Recipe card"],
     emoji: "🍛",
     cardImage: "/3rdwed.jpeg",
-    campuses: ["Polokwane"],
+    campuses: ["Polokwane", "Mokopane"],
   },
   {
     id: "barista-croissants",

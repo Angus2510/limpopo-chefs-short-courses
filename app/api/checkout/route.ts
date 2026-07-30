@@ -39,7 +39,8 @@ export async function POST(req: NextRequest) {
       !pricePerPerson ||
       !firstName ||
       !lastName ||
-      !email
+      !email ||
+      !phone
     ) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -110,7 +111,7 @@ export async function POST(req: NextRequest) {
         firstName: String(firstName).trim(),
         lastName: String(lastName).trim(),
         email: String(email).trim().toLowerCase(),
-        phone: phone ? String(phone).trim() : null,
+        phone: String(phone).trim(),
         courseId: String(courseId),
         courseTitle: String(courseTitle),
         campus: String(campus),

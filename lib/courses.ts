@@ -69,7 +69,7 @@ export const COURSES: Course[] = [
       },
     ],
     availableDates: ["2026-08-19"],
-    maxParticipants: 25,
+    maxParticipants: 18,
     instructor: "Chef Kelly  ",
     includes: ["All ingredients", "Tasting portions", "Recipe card"],
     emoji: "🍛",
@@ -216,6 +216,7 @@ export const COURSES: Course[] = [
       "Certificate of completion",
     ],
     emoji: "🎓",
+    cardImage: "/pastry-beg.png",
     campuses: ["Polokwane"],
   },
 
@@ -347,6 +348,7 @@ export const COURSES: Course[] = [
       "Certificate of completion",
     ],
     emoji: "⭐",
+    cardImage: "/pastry-adv.png",
     campuses: ["Polokwane"],
   },
 ];

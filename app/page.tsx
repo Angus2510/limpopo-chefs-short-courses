@@ -10,14 +10,12 @@ import { Separator } from "@/components/ui/separator";
 import { BookingSheet } from "@/components/booking-sheet";
 import {
   COURSES,
-  CATEGORIES,
   CAMPUSES,
   formatPrice,
   type Course,
-  type Category,
   type Campus,
 } from "@/lib/courses";
-import { ChefHat, Clock, MapPin, Phone, Users } from "lucide-react";
+import { ChefHat, Clock, MapPin, MessageCircle, Phone, Users } from "lucide-react";
 
 const CATEGORY_GRADIENTS: Record<string, string> = {
   Fundamentals: "from-[#315631] to-[#1e3d1e]",
@@ -59,16 +57,13 @@ function getDateParts(dateStr: string) {
 }
 
 export default function ShortCoursesPage() {
-  const [activeCategory, setActiveCategory] = useState<Category | "All">("All");
   const [activeCampus, setActiveCampus] = useState<Campus | "All">("All");
   const [bookingCourse, setBookingCourse] = useState<Course | null>(null);
 
   const visible = COURSES.filter((c) => {
-    const categoryMatch =
-      activeCategory === "All" || c.category === activeCategory;
     const campusMatch =
       activeCampus === "All" || c.campuses.includes(activeCampus as Campus);
-    return categoryMatch && campusMatch;
+    return campusMatch;
   });
 
   const confirmedCourses = visible.filter(
@@ -182,23 +177,8 @@ export default function ShortCoursesPage() {
 
       {/* ── Courses ── */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        {/* Category filters */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          {(["All", ...CATEGORIES] as Array<"All" | Category>).map((cat) => (
-            <Button
-              key={cat}
-              variant={activeCategory === cat ? "default" : "outline"}
-              size="sm"
-              className="rounded-[21px]"
-              onClick={() => setActiveCategory(cat)}
-            >
-              {cat === "All" ? "All Courses" : cat}
-            </Button>
-          ))}
-        </div>
-
         {/* Campus filter */}
-        <div className="flex items-center gap-2 mb-8">
+        <div className="flex items-center gap-2 mb-10">
           <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
           <span className="text-xs text-muted-foreground mr-1">Campus:</span>
           {(["All", ...CAMPUSES] as Array<"All" | Campus>).map((c) => (
@@ -216,14 +196,10 @@ export default function ShortCoursesPage() {
 
         {sections.map((section) => (
           <section key={section.key} className="mb-10 last:mb-0">
-            <div className="mb-4 flex items-center gap-3">
+            <div className="mb-4">
               <h2 className="text-xl md:text-2xl font-bold text-foreground tracking-tight">
                 {section.label}
               </h2>
-              <Badge variant="secondary" className="rounded-full px-3 py-0.5">
-                {section.courses.length}{" "}
-                {section.courses.length === 1 ? "course" : "courses"}
-              </Badge>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -263,11 +239,6 @@ export default function ShortCoursesPage() {
                           {course.emoji}
                         </span>
                       )}
-                      <div className="absolute top-3 left-3">
-                        <Badge className="bg-white/25 text-white border-white/30 text-[10px]">
-                          {course.category}
-                        </Badge>
-                      </div>
                     </div>
 
                     {/* Body */}
@@ -392,6 +363,9 @@ export default function ShortCoursesPage() {
                   <Phone className="w-3 h-3 shrink-0" /> 015 491 1226
                 </p>
                 <p className="flex items-center gap-2">
+                  <MessageCircle className="w-3 h-3 shrink-0" /> 066 008 6821
+                </p>
+                <p className="flex items-center gap-2">
                   <MapPin className="w-3 h-3 shrink-0" /> 82 Rabe Street,
                   Mokopane 0600
                 </p>
@@ -406,7 +380,10 @@ export default function ShortCoursesPage() {
                   <Phone className="w-3 h-3 shrink-0" /> 015 292 0102
                 </p>
                 <p className="flex items-center gap-2">
-                  <MapPin className="w-3 h-3 shrink-0" /> 21 Sapphire Street,
+                  <MessageCircle className="w-3 h-3 shrink-0" /> 066 245 0458
+                </p>
+                <p className="flex items-center gap-2">
+                  <MapPin className="w-3 h-3 shrink-0" /> 22 Hans van Rensburg Street,
                   Polokwane 0699
                 </p>
               </div>

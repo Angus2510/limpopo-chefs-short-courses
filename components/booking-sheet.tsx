@@ -6,7 +6,6 @@ import {
   Sheet,
   SheetClose,
   SheetContent,
-  SheetDescription,
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
@@ -80,7 +79,8 @@ export function BookingSheet({
     (!hasDates || !!selectedDate) &&
     firstName.trim().length > 0 &&
     lastName.trim().length > 0 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim()) &&
+    phone.trim().length > 0;
 
   async function handleBook() {
     if (!canBook || loading) return;
@@ -105,7 +105,7 @@ export function BookingSheet({
           firstName: firstName.trim(),
           lastName: lastName.trim(),
           email: email.trim(),
-          phone: phone.trim() || undefined,
+          phone: phone.trim(),
         }),
       });
 
@@ -167,15 +167,9 @@ export function BookingSheet({
             <SheetTitle className="text-white text-xl font-bold leading-snug">
               {course.title}
             </SheetTitle>
-            <SheetDescription className="text-white/70 text-sm">
-              {course.instructor}
-            </SheetDescription>
           </SheetHeader>
 
           <div className="flex flex-wrap gap-1.5 mt-3">
-            <Badge className="bg-white/20 text-white border-white/30 text-[10px]">
-              {course.category}
-            </Badge>
             <Badge className="bg-white/20 text-white border-white/30 text-[10px] flex items-center gap-1">
               <Clock className="w-2.5 h-2.5" />
               {course.duration}
@@ -394,10 +388,7 @@ export function BookingSheet({
                 </div>
                 <div className="col-span-2">
                   <label className="text-xs font-medium text-foreground block mb-1">
-                    Phone Number{" "}
-                    <span className="text-muted-foreground font-normal">
-                      (optional)
-                    </span>
+                    Phone Number <span className="text-destructive">*</span>
                   </label>
                   <input
                     type="tel"
@@ -405,6 +396,7 @@ export function BookingSheet({
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="+27 82 XXX XXXX"
                     className={INPUT}
+                    required
                   />
                 </div>
               </div>

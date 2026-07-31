@@ -24,7 +24,9 @@ export default function AdminBookingsPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const peoplePerCourseAndCampus = bookings.reduce(
+  const confirmedBookings = bookings.filter((booking) => booking.paid);
+
+  const peoplePerCourseAndCampus = confirmedBookings.reduce(
     (acc, booking) => {
       const current = acc[booking.courseTitle] ?? { Mokopane: 0, Polokwane: 0 };
       const campusKey =
@@ -215,7 +217,7 @@ export default function AdminBookingsPage() {
               Admin Bookings
             </h1>
             <p className="text-xs text-muted-foreground">
-              Course booked, paid status, email, and phone details.
+              Confirmed attendees are counted only after successful payment.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -248,7 +250,7 @@ export default function AdminBookingsPage() {
                 <th className="px-4 py-3">Course</th>
                 <th className="px-4 py-3">Mokopane</th>
                 <th className="px-4 py-3">Polokwane</th>
-                <th className="px-4 py-3">Total</th>
+                <th className="px-4 py-3">Confirmed Total</th>
               </tr>
             </thead>
             <tbody>

@@ -13,9 +13,9 @@ export const metadata: Metadata = {
   description:
     "Book professional culinary short courses at Limpopo Chefs Academy — available at Mokopane and Polokwane campuses.",
   icons: {
-    icon: "/logo%20(2).png",
-    shortcut: "/logo%20(2).png",
-    apple: "/logo%20(2).png",
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/icon.png",
   },
 };
 

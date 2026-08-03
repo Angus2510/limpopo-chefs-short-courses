@@ -61,7 +61,7 @@ export const COURSES: Course[] = [
         id: "cook-with-class",
         label: "Cook with class",
         price: 275,
-        maxParticipants: 20,
+        maxParticipants: 18,
         timeLabel: "Starts at 17:30",
         note: "Hands-on cooking session",
       },

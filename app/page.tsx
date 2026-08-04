@@ -67,7 +67,9 @@ type AvailabilityMap = Record<
   string,
   {
     remaining: number;
+    campusRemaining?: Record<Campus, number>;
     choiceRemaining?: Record<string, number>;
+    choiceCampusRemaining?: Record<string, Record<Campus, number>>;
   }
 >;
 
@@ -250,6 +252,8 @@ export default function ShortCoursesPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {section.courses.map((course) => {
+                const selectedCampus =
+                  activeCampus === "All" ? null : activeCampus;
                 const available = isCourseAvailable(course);
                 const nextDate = [...course.availableDates].sort()[0] ?? null;
                 const dateParts =
@@ -263,14 +267,25 @@ export default function ShortCoursesPage() {
                 const remainingText = course.bookingChoices?.length
                   ? course.bookingChoices
                       .map((choice) => {
-                        const remaining =
-                          courseAvailability?.choiceRemaining?.[choice.id] ??
-                          choice.maxParticipants ??
-                          course.maxParticipants;
+                        const remaining = selectedCampus
+                          ? (courseAvailability?.choiceCampusRemaining?.[
+                              choice.id
+                            ]?.[selectedCampus] ??
+                            courseAvailability?.choiceRemaining?.[choice.id] ??
+                            choice.maxParticipants ??
+                            course.maxParticipants)
+                          : (courseAvailability?.choiceRemaining?.[choice.id] ??
+                            choice.maxParticipants ??
+                            course.maxParticipants);
                         return `${choice.label}: ${remaining} spots left`;
                       })
                       .join(" · ")
-                  : `${courseAvailability?.remaining ?? course.maxParticipants} spots left`;
+                  : `${selectedCampus
+                      ? (courseAvailability?.campusRemaining?.[selectedCampus] ??
+                        courseAvailability?.remaining ??
+                        course.maxParticipants)
+                      : (courseAvailability?.remaining ??
+                        course.maxParticipants)} spots left`;
 
                 return (
                   <Card

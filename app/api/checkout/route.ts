@@ -81,6 +81,7 @@ export async function POST(req: NextRequest) {
       _sum: { participants: true },
       where: {
         courseId: String(courseId),
+        campus: String(campus),
         status: "paid",
         ...(selectedChoice
           ? { courseTitle: { contains: `(${selectedChoice.label})` } }

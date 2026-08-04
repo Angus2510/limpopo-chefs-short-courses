@@ -6,6 +6,10 @@ import Link from "next/link";
 
 type BookingRow = {
   id: string;
+  firstName?: string;
+  firstname?: string;
+  bookedBy?: string;
+  lastName?: string;
   courseTitle: string;
   campus: string;
   paid: boolean;
@@ -54,7 +58,13 @@ export default function AdminBookingsPage() {
     }));
 
   async function loadBookings() {
-    const res = await fetch("/api/admin/bookings", { cache: "no-store" });
+    const res = await fetch(`/api/admin/bookings?ts=${Date.now()}`, {
+      cache: "no-store",
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+    });
 
     if (res.status === 401) {
       setLoggedIn(false);
@@ -67,7 +77,11 @@ export default function AdminBookingsPage() {
     }
 
     const data = (await res.json()) as { bookings: BookingRow[] };
-    setBookings(data.bookings);
+    const normalizedBookings = data.bookings.map((booking) => ({
+      ...booking,
+      firstName: booking.firstName ?? booking.firstname ?? "",
+    }));
+    setBookings(normalizedBookings);
     setLoggedIn(true);
   }
 
@@ -289,6 +303,7 @@ export default function AdminBookingsPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <th className="px-4 py-3">Booked By</th>
                 <th className="px-4 py-3">Course Booked</th>
                 <th className="px-4 py-3">Campus</th>
                 <th className="px-4 py-3">People</th>
@@ -302,7 +317,7 @@ export default function AdminBookingsPage() {
               {bookings.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={7}
+                    colSpan={8}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
                     No bookings yet.
@@ -311,6 +326,11 @@ export default function AdminBookingsPage() {
               ) : (
                 bookings.map((booking) => (
                   <tr key={booking.id} className="border-t border-border">
+                    <td className="px-4 py-3 font-medium text-foreground">
+                      {booking.firstName?.trim() ||
+                        booking.bookedBy?.trim().split(/\s+/)[0] ||
+                        "-"}
+                    </td>
                     <td className="px-4 py-3 font-medium text-foreground">
                       {booking.courseTitle}
                     </td>

@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { COURSES } from "@/lib/courses";
+import { CAMPUSES, COURSES, type Campus } from "@/lib/courses";
 
 type AvailabilityByCourse = Record<
   string,
   {
     remaining: number;
+    campusRemaining?: Record<Campus, number>;
     choiceRemaining?: Record<string, number>;
+    choiceCampusRemaining?: Record<string, Record<Campus, number>>;
   }
 >;
 
@@ -16,6 +18,7 @@ export async function GET() {
     select: {
       courseId: true,
       courseTitle: true,
+      campus: true,
       participants: true,
     },
   });
@@ -27,33 +30,56 @@ export async function GET() {
       (booking) => booking.courseId === course.id,
     );
 
-    const paidParticipants = bookingsForCourse.reduce(
-      (sum, booking) => sum + booking.participants,
-      0,
+    const campusRemaining = CAMPUSES.reduce(
+      (acc, campus) => {
+        const paidForCampus = bookingsForCourse
+          .filter((booking) => booking.campus === campus)
+          .reduce((sum, booking) => sum + booking.participants, 0);
+
+        acc[campus] = Math.max(course.maxParticipants - paidForCampus, 0);
+        return acc;
+      },
+      {} as Record<Campus, number>,
     );
 
     const courseAvailability: AvailabilityByCourse[string] = {
-      remaining: Math.max(course.maxParticipants - paidParticipants, 0),
+      // Backward-compatible summary: best remaining across campuses.
+      remaining: Math.max(...Object.values(campusRemaining), 0),
+      campusRemaining,
     };
 
     if (course.bookingChoices?.length) {
       const choiceRemaining: Record<string, number> = {};
+      const choiceCampusRemaining: Record<string, Record<Campus, number>> = {};
 
       for (const choice of course.bookingChoices) {
         const choiceCapacity = choice.maxParticipants ?? course.maxParticipants;
-        const paidForChoice = bookingsForCourse
-          .filter((booking) =>
-            booking.courseTitle.includes(`(${choice.label})`),
-          )
-          .reduce((sum, booking) => sum + booking.participants, 0);
+        const campusChoiceRemaining = CAMPUSES.reduce(
+          (acc, campus) => {
+            const paidForCampusChoice = bookingsForCourse
+              .filter(
+                (booking) =>
+                  booking.campus === campus &&
+                  booking.courseTitle.includes(`(${choice.label})`),
+              )
+              .reduce((sum, booking) => sum + booking.participants, 0);
 
+            acc[campus] = Math.max(choiceCapacity - paidForCampusChoice, 0);
+            return acc;
+          },
+          {} as Record<Campus, number>,
+        );
+
+        choiceCampusRemaining[choice.id] = campusChoiceRemaining;
+        // Backward-compatible summary: best remaining across campuses.
         choiceRemaining[choice.id] = Math.max(
-          choiceCapacity - paidForChoice,
+          ...Object.values(campusChoiceRemaining),
           0,
         );
       }
 
       courseAvailability.choiceRemaining = choiceRemaining;
+      courseAvailability.choiceCampusRemaining = choiceCampusRemaining;
     }
 
     availability[course.id] = courseAvailability;

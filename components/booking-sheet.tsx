@@ -40,7 +40,9 @@ interface BookingSheetProps {
 
 type CourseAvailability = {
   remaining: number;
+  campusRemaining?: Record<Campus, number>;
   choiceRemaining?: Record<string, number>;
+  choiceCampusRemaining?: Record<string, Record<Campus, number>>;
 };
 
 const INPUT =
@@ -90,9 +92,17 @@ export function BookingSheet({
   const selectedRemaining = Math.max(
     availability
       ? selectedBookingChoice
-        ? (availability.choiceRemaining?.[selectedBookingChoice.id] ??
-          selectedCapacity)
-        : availability.remaining
+        ? (campus
+            ? (availability.choiceCampusRemaining?.[selectedBookingChoice.id]?.[
+                campus
+              ] ??
+              availability.choiceRemaining?.[selectedBookingChoice.id] ??
+              selectedCapacity)
+            : (availability.choiceRemaining?.[selectedBookingChoice.id] ??
+              selectedCapacity))
+        : (campus
+            ? (availability.campusRemaining?.[campus] ?? availability.remaining)
+            : availability.remaining)
       : selectedCapacity,
     0,
   );
@@ -356,7 +366,11 @@ export function BookingSheet({
                               {formatPrice(choice.price)} pp
                             </p>
                             <p className="text-[11px] text-muted-foreground">
-                              {availability?.choiceRemaining?.[choice.id] ??
+                              {(campus
+                                ? availability?.choiceCampusRemaining?.[
+                                    choice.id
+                                  ]?.[campus]
+                                : availability?.choiceRemaining?.[choice.id]) ??
                                 choice.maxParticipants ??
                                 activeCourse.maxParticipants}{" "}
                               spots left

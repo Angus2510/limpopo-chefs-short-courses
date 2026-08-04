@@ -92,17 +92,17 @@ export function BookingSheet({
   const selectedRemaining = Math.max(
     availability
       ? selectedBookingChoice
-        ? (campus
-            ? (availability.choiceCampusRemaining?.[selectedBookingChoice.id]?.[
-                campus
-              ] ??
-              availability.choiceRemaining?.[selectedBookingChoice.id] ??
-              selectedCapacity)
-            : (availability.choiceRemaining?.[selectedBookingChoice.id] ??
-              selectedCapacity))
-        : (campus
-            ? (availability.campusRemaining?.[campus] ?? availability.remaining)
-            : availability.remaining)
+        ? campus
+          ? (availability.choiceCampusRemaining?.[selectedBookingChoice.id]?.[
+              campus
+            ] ??
+            availability.choiceRemaining?.[selectedBookingChoice.id] ??
+            selectedCapacity)
+          : (availability.choiceRemaining?.[selectedBookingChoice.id] ??
+            selectedCapacity)
+        : campus
+          ? (availability.campusRemaining?.[campus] ?? availability.remaining)
+          : availability.remaining
       : selectedCapacity,
     0,
   );

@@ -280,12 +280,16 @@ export default function ShortCoursesPage() {
                         return `${choice.label}: ${remaining} spots left`;
                       })
                       .join(" · ")
-                  : `${selectedCampus
-                      ? (courseAvailability?.campusRemaining?.[selectedCampus] ??
-                        courseAvailability?.remaining ??
-                        course.maxParticipants)
-                      : (courseAvailability?.remaining ??
-                        course.maxParticipants)} spots left`;
+                  : `${
+                      selectedCampus
+                        ? (courseAvailability?.campusRemaining?.[
+                            selectedCampus
+                          ] ??
+                          courseAvailability?.remaining ??
+                          course.maxParticipants)
+                        : (courseAvailability?.remaining ??
+                          course.maxParticipants)
+                    } spots left`;
 
                 return (
                   <Card

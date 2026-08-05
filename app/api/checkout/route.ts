@@ -108,10 +108,13 @@ export async function POST(req: NextRequest) {
       ? `${course.title} (${selectedChoice.label})`
       : course.title;
 
+    const normalizedEmail = String(email).trim().toLowerCase();
+
     const amountInCents = Math.round(
       pricePerPersonNumber * participantsNumber * 100,
     );
-    const clientReferenceId = randomUUID();
+    const requestReferenceId = randomUUID();
+    const clientReferenceId = `${normalizedEmail}:${requestReferenceId}`;
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000";
 
     // Create Yoco Checkout session (server-side only — secret key never leaves the server)
@@ -120,12 +123,12 @@ export async function POST(req: NextRequest) {
       headers: {
         Authorization: `Bearer ${process.env.YOCO_SECRET_KEY}`,
         "Content-Type": "application/json",
-        "Idempotency-Key": clientReferenceId,
+        "Idempotency-Key": requestReferenceId,
       },
       body: JSON.stringify({
         amount: amountInCents,
         currency: "ZAR",
-        successUrl: `${baseUrl}/payment/success?ref=${clientReferenceId}`,
+        successUrl: `${baseUrl}/payment/success?ref=${encodeURIComponent(clientReferenceId)}`,
         cancelUrl: `${baseUrl}/payment/cancelled`,
         failureUrl: `${baseUrl}/payment/cancelled`,
         metadata: {
@@ -136,7 +139,7 @@ export async function POST(req: NextRequest) {
           participants: String(participantsNumber),
           bookingChoiceId: bookingChoiceId ? String(bookingChoiceId) : "",
           bookingChoiceLabel: selectedChoice?.label ?? "",
-          customerEmail: email,
+          customerEmail: normalizedEmail,
           customerName: `${firstName} ${lastName}`,
           clientReferenceId,
         },
@@ -168,7 +171,7 @@ export async function POST(req: NextRequest) {
       data: {
         firstName: String(firstName).trim(),
         lastName: String(lastName).trim(),
-        email: String(email).trim().toLowerCase(),
+        email: normalizedEmail,
         phone: String(phone).trim(),
         courseId: String(courseId),
         courseTitle: sanitizedCourseTitle,

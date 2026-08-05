@@ -60,6 +60,19 @@ function verifyWebhookSignature(
   return !!provided && safeCompare(provided, expectedHex);
 }
 
+function whereForClientReferenceId(clientReferenceId: string) {
+  if (clientReferenceId.includes(":")) {
+    return { clientReferenceId };
+  }
+
+  return {
+    OR: [
+      { clientReferenceId },
+      { clientReferenceId: { endsWith: `:${clientReferenceId}` } },
+    ],
+  };
+}
+
 export async function POST(req: NextRequest) {
   const rawBody = await req.text();
 
@@ -100,7 +113,10 @@ export async function POST(req: NextRequest) {
 
     if (clientReferenceId) {
       const updated = await prisma.booking.updateMany({
-        where: { clientReferenceId, status: "pending" },
+        where: {
+          ...whereForClientReferenceId(clientReferenceId),
+          status: "pending",
+        },
         data: { status: "paid", yocoPaymentId: paymentId },
       });
       console.log(
@@ -115,7 +131,10 @@ export async function POST(req: NextRequest) {
     const clientReferenceId = payload.metadata?.clientReferenceId;
     if (clientReferenceId) {
       await prisma.booking.updateMany({
-        where: { clientReferenceId, status: "pending" },
+        where: {
+          ...whereForClientReferenceId(clientReferenceId),
+          status: "pending",
+        },
         data: { status: "failed" },
       });
     }

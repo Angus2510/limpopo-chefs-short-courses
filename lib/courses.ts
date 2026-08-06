@@ -106,15 +106,15 @@ export const COURSES: Course[] = [
 
   // ── September 2026 ─────────────────────────────────────────────────────────
   {
-    id: "macaron-class",
+    id: "macaron-class-polokwane",
     title: "Macaron Class",
     category: "Pastry",
     description:
       "Discover the secrets to perfect French macarons from mixing and piping to baking and filling. You'll create beautiful handcrafted macarons to take home while learning tips for consistent results every time.",
     duration: "1 Day (8 hrs)",
-    price: 950,
+    price: 450,
     availableDates: ["2026-09-05"],
-    maxParticipants: 12,
+    maxParticipants: 30,
     instructor: "Chef Breyton, & Chef Potego",
     includes: [
       "All ingredients",
@@ -125,6 +125,27 @@ export const COURSES: Course[] = [
     emoji: "🫐",
     cardImage: "/macaron.jpeg",
     campuses: ["Polokwane"],
+  },
+  {
+    id: "macaron-class-mokopane",
+    title: "Macaron Class",
+    category: "Pastry",
+    description:
+      "Discover the secrets to perfect French macarons from mixing and piping to baking and filling. You'll create beautiful handcrafted macarons to take home while learning tips for consistent results every time.",
+    duration: "1 Day (8 hrs)",
+    price: 450,
+    availableDates: ["2026-09-12"],
+    maxParticipants: 30,
+    instructor: "Chef Breyton, & Chef Potego",
+    includes: [
+      "All ingredients",
+      "Chef's apron",
+      "Recipe booklet",
+      "Macaron box to take home",
+    ],
+    emoji: "🫐",
+    cardImage: "/macaron.jpeg",
+    campuses: ["Mokopane"],
   },
   {
     id: "cooking-club-sep",

@@ -42,6 +42,8 @@ const CURRENTLY_AVAILABLE_COURSE_IDS = new Set<string>([
 
 const CONFIRMED_TIMES: Record<string, string> = {
   "cooking-club-aug": "17:30",
+  "macaron-class-polokwane": "09:00",
+  "macaron-class-mokopane": "09:00",
 };
 
 function isCourseAvailable(course: Course) {

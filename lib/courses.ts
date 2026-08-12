@@ -143,15 +143,15 @@ export const COURSES: Course[] = [
     title: "Cooking Club: ",
     category: "Fundamentals",
     description:
-      "Join us every third Wednesday for a relaxed evening of cooking, learning and great food. Each month features a brand-new recipe and hands-on experience led by our professional chefs. Come for the cooking, stay for the company",
-    duration: "Evening (3 hrs)",
+      "Join us every month for our Budget Cooking Club. Each month, you’ll learn a new recipe, pick up new cooking skills, and enjoy a fun evening with fellow food lovers. This month’s menu is Chicken & Mushroom Ravioli made from scratch. No time to cook? No problem. Simply place your order, collect your meal, and enjoy a freshly prepared homemade dinner without the effort.",
+    duration: "Evening ",
     price: 450,
     availableDates: ["2026-09-16"],
     maxParticipants: 25,
     instructor: "Chef Kelly",
     includes: ["All ingredients", "Tasting portions", "Recipe card"],
     emoji: "🍝",
-    cardImage: "/3rdwed.jpeg",
+    cardImage: "/cook-club.jpeg",
     campuses: ["Polokwane"],
   },
   {

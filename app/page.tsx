@@ -36,12 +36,14 @@ const CATEGORY_GRADIENTS: Record<string, string> = {
 // Keep this list updated to control what can be booked right now.
 const CURRENTLY_AVAILABLE_COURSE_IDS = new Set<string>([
   "cooking-club-aug", // 3rd Wednesday Cooking Club
+  "cooking-club-sep", // 3rd Wednesday Cooking Club
   "macaron-class-polokwane", // Macaron Class - Polokwane
   "macaron-class-mokopane", // Macaron Class - Mokopane
 ]);
 
 const CONFIRMED_TIMES: Record<string, string> = {
   "cooking-club-aug": "17:30",
+  "cooking-club-sep": "17:30",
   "macaron-class-polokwane": "09:00",
   "macaron-class-mokopane": "09:00",
 };

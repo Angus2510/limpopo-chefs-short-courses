@@ -364,6 +364,13 @@ export default function AdminBookingsPage() {
           </p>
         </div>
 
+        <div className="hidden print:block print:mb-4">
+          <h2 className="text-xl font-bold text-foreground">{selectedCourse}</h2>
+          <p className="text-sm text-muted-foreground">
+            {printableTotalPeople} people · Phone numbers included
+          </p>
+        </div>
+
         <div className="mb-6 overflow-x-auto border border-border rounded-xl">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">

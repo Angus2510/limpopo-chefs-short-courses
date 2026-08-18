@@ -76,7 +76,8 @@ export default function AdminBookingsPage() {
             rows: printableBookings
               .filter(
                 (booking) =>
-                  booking.courseTitle === courseTitle && booking.campus === campus,
+                  booking.courseTitle === courseTitle &&
+                  booking.campus === campus,
               )
               .flatMap((booking) =>
                 Array.from({ length: booking.participants }, (_, index) => ({
@@ -449,7 +450,9 @@ export default function AdminBookingsPage() {
 
         <div className="hidden print:block print:mb-6 print:break-inside-avoid">
           <h2 className="text-2xl font-bold text-foreground">
-            {selectedCourse === "All courses" ? "Course Attendance Register" : selectedCourse}
+            {selectedCourse === "All courses"
+              ? "Course Attendance Register"
+              : selectedCourse}
             {selectedCampus !== "All campuses" && ` · ${selectedCampus}`}
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -458,33 +461,52 @@ export default function AdminBookingsPage() {
 
           <div className="mt-4 space-y-8">
             {printSections.map((section) => (
-              <div key={section.courseTitle} className="page-break-inside-avoid">
+              <div
+                key={section.courseTitle}
+                className="page-break-inside-avoid"
+              >
                 <h3 className="mb-2 text-lg font-bold text-foreground">
                   {section.courseTitle}
                 </h3>
 
                 {section.campuses.map(({ campus, rows }) => (
-                  <div key={`${section.courseTitle}-${campus}`} className="mb-5">
+                  <div
+                    key={`${section.courseTitle}-${campus}`}
+                    className="mb-5"
+                  >
                     <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
                       {campus}
                     </h4>
 
                     {rows.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No attendees.</p>
+                      <p className="text-sm text-muted-foreground">
+                        No attendees.
+                      </p>
                     ) : (
                       <div className="overflow-hidden rounded-lg border border-border">
                         <table className="w-full border-collapse text-sm">
                           <thead className="bg-muted/50">
                             <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
-                              <th className="border border-border px-2 py-2">Guest</th>
-                              <th className="border border-border px-2 py-2">Name</th>
-                              <th className="border border-border px-2 py-2">Phone</th>
-                              <th className="border border-border px-2 py-2">Signature</th>
+                              <th className="border border-border px-2 py-2">
+                                Guest
+                              </th>
+                              <th className="border border-border px-2 py-2">
+                                Name
+                              </th>
+                              <th className="border border-border px-2 py-2">
+                                Phone
+                              </th>
+                              <th className="border border-border px-2 py-2">
+                                Signature
+                              </th>
                             </tr>
                           </thead>
                           <tbody>
                             {rows.map((row) => (
-                              <tr key={`${row.id}-${row.attendeeIndex}`} className="align-top">
+                              <tr
+                                key={`${row.id}-${row.attendeeIndex}`}
+                                className="align-top"
+                              >
                                 <td className="border border-border px-2 py-3 text-center font-semibold">
                                   {row.attendeeIndex}
                                 </td>

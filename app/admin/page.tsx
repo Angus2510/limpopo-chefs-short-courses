@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Shield, LogOut, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { COURSES } from "@/lib/courses";
 
 type BookingRow = {
   id: string;
@@ -10,6 +11,7 @@ type BookingRow = {
   firstname?: string;
   bookedBy?: string;
   lastName?: string;
+  courseId: string;
   courseTitle: string;
   campus: string;
   paid: boolean;
@@ -28,8 +30,13 @@ export default function AdminBookingsPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("All courses");
+  const [transferringId, setTransferringId] = useState<string | null>(null);
 
   const confirmedBookings = bookings.filter((booking) => booking.paid);
+  const courseOptions = COURSES.map((course) => ({
+    id: course.id,
+    label: course.title,
+  }));
   const uniqueCourseTitles = Array.from(
     new Set(confirmedBookings.map((booking) => booking.courseTitle)),
   ).sort((a, b) => a.localeCompare(b));
@@ -159,6 +166,48 @@ export default function AdminBookingsPage() {
       setError("Could not log out. Please try again.");
     } finally {
       setAuthLoading(false);
+    }
+  }
+
+  async function handleTransferBooking(bookingId: string, nextCourseId: string) {
+    if (!nextCourseId) return;
+    setTransferringId(bookingId);
+    setError(null);
+
+    try {
+      const res = await fetch(`/api/admin/bookings/${bookingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courseId: nextCourseId }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(
+          (data as { error?: string }).error ?? "Could not move this booking.",
+        );
+      }
+
+      const updatedBooking = (await res.json()) as { booking: BookingRow };
+      setBookings((current) =>
+        current.map((booking) =>
+          booking.id === bookingId
+            ? {
+                ...booking,
+                courseId: updatedBooking.booking.courseId,
+                courseTitle: updatedBooking.booking.courseTitle,
+              }
+            : booking,
+        ),
+      );
+    } catch (transferError) {
+      setError(
+        transferError instanceof Error
+          ? transferError.message
+          : "Could not move this booking.",
+      );
+    } finally {
+      setTransferringId(null);
     }
   }
 
@@ -360,6 +409,7 @@ export default function AdminBookingsPage() {
               <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 py-3">Booked By</th>
                 <th className="px-4 py-3">Course Booked</th>
+                <th className="px-4 py-3">Move To</th>
                 <th className="px-4 py-3">Campus</th>
                 <th className="px-4 py-3">People</th>
                 <th className="px-4 py-3">Paid</th>
@@ -372,7 +422,7 @@ export default function AdminBookingsPage() {
               {printableBookings.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
                     No paid bookings for this course yet.
@@ -380,7 +430,7 @@ export default function AdminBookingsPage() {
                 </tr>
               ) : (
                 printableBookings.map((booking) => (
-                  <tr key={booking.id} className="border-t border-border">
+                  <tr key={booking.id} className="border-t border-border align-top">
                     <td className="px-4 py-3 font-medium text-foreground">
                       {booking.firstName?.trim() ||
                         booking.bookedBy?.trim().split(/\s+/)[0] ||
@@ -388,6 +438,22 @@ export default function AdminBookingsPage() {
                     </td>
                     <td className="px-4 py-3 font-medium text-foreground">
                       {booking.courseTitle}
+                    </td>
+                    <td className="px-4 py-3">
+                      <select
+                        value={booking.courseId}
+                        onChange={(event) =>
+                          handleTransferBooking(booking.id, event.target.value)
+                        }
+                        disabled={transferringId === booking.id}
+                        className="h-9 rounded-lg border border-border bg-background px-2 text-xs text-foreground"
+                      >
+                        {courseOptions.map((course) => (
+                          <option key={course.id} value={course.id}>
+                            {course.label}
+                          </option>
+                        ))}
+                      </select>
                     </td>
                     <td className="px-4 py-3 text-foreground">
                       {booking.campus}

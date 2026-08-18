@@ -355,7 +355,7 @@ export default function AdminBookingsPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border bg-white">
+      <header className="border-b border-border bg-white no-print">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div>
             <h1 className="text-lg font-bold text-foreground">
@@ -469,64 +469,66 @@ export default function AdminBookingsPage() {
                   {section.courseTitle}
                 </h3>
 
-                {section.campuses.map(({ campus, rows }) => (
-                  <div
-                    key={`${section.courseTitle}-${campus}`}
-                    className="mb-5"
-                  >
-                    <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                      {campus}
-                    </h4>
+                {section.campuses
+                  .filter(({ rows }) => rows.length > 0)
+                  .map(({ campus, rows }) => (
+                    <div
+                      key={`${section.courseTitle}-${campus}`}
+                      className="mb-5"
+                    >
+                      <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                        {campus}
+                      </h4>
 
-                    {rows.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">
-                        No attendees.
-                      </p>
-                    ) : (
-                      <div className="overflow-hidden rounded-lg border border-border">
-                        <table className="w-full border-collapse text-sm">
-                          <thead className="bg-muted/50">
-                            <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
-                              <th className="border border-border px-2 py-2">
-                                Guest
-                              </th>
-                              <th className="border border-border px-2 py-2">
-                                Name
-                              </th>
-                              <th className="border border-border px-2 py-2">
-                                Phone
-                              </th>
-                              <th className="border border-border px-2 py-2">
-                                Signature
-                              </th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {rows.map((row) => (
-                              <tr
-                                key={`${row.id}-${row.attendeeIndex}`}
-                                className="align-top"
-                              >
-                                <td className="border border-border px-2 py-3 text-center font-semibold">
-                                  {row.attendeeIndex}
-                                </td>
-                                <td className="border border-border px-2 py-3">
-                                  {row.isExtraGuest ? "" : row.attendeeName}
-                                </td>
-                                <td className="border border-border px-2 py-3">
-                                  {row.isExtraGuest ? "" : row.attendeePhone}
-                                </td>
-                                <td className="border border-border px-2 py-3 w-48">
-                                  &nbsp;
-                                </td>
+                      {rows.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">
+                          No attendees.
+                        </p>
+                      ) : (
+                        <div className="overflow-hidden rounded-lg border border-border">
+                          <table className="w-full border-collapse text-sm">
+                            <thead className="bg-muted/50">
+                              <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
+                                <th className="border border-border px-2 py-2">
+                                  Guest
+                                </th>
+                                <th className="border border-border px-2 py-2">
+                                  Name
+                                </th>
+                                <th className="border border-border px-2 py-2">
+                                  Phone
+                                </th>
+                                <th className="border border-border px-2 py-2">
+                                  Signature
+                                </th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    )}
-                  </div>
-                ))}
+                            </thead>
+                            <tbody>
+                              {rows.map((row) => (
+                                <tr
+                                  key={`${row.id}-${row.attendeeIndex}`}
+                                  className="align-top"
+                                >
+                                  <td className="border border-border px-2 py-3 text-center font-semibold">
+                                    {row.attendeeIndex}
+                                  </td>
+                                  <td className="border border-border px-2 py-3">
+                                    {row.isExtraGuest ? "" : row.attendeeName}
+                                  </td>
+                                  <td className="border border-border px-2 py-3">
+                                    {row.isExtraGuest ? "" : row.attendeePhone}
+                                  </td>
+                                  <td className="border border-border px-2 py-3 w-48">
+                                    &nbsp;
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  ))}
               </div>
             ))}
           </div>

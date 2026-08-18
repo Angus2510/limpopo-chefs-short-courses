@@ -169,7 +169,10 @@ export default function AdminBookingsPage() {
     }
   }
 
-  async function handleTransferBooking(bookingId: string, nextCourseId: string) {
+  async function handleTransferBooking(
+    bookingId: string,
+    nextCourseId: string,
+  ) {
     if (!nextCourseId) return;
     setTransferringId(bookingId);
     setError(null);
@@ -430,7 +433,10 @@ export default function AdminBookingsPage() {
                 </tr>
               ) : (
                 printableBookings.map((booking) => (
-                  <tr key={booking.id} className="border-t border-border align-top">
+                  <tr
+                    key={booking.id}
+                    className="border-t border-border align-top"
+                  >
                     <td className="px-4 py-3 font-medium text-foreground">
                       {booking.firstName?.trim() ||
                         booking.bookedBy?.trim().split(/\s+/)[0] ||

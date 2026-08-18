@@ -365,7 +365,9 @@ export default function AdminBookingsPage() {
         </div>
 
         <div className="hidden print:block print:mb-4">
-          <h2 className="text-xl font-bold text-foreground">{selectedCourse}</h2>
+          <h2 className="text-xl font-bold text-foreground">
+            {selectedCourse}
+          </h2>
           <p className="text-sm text-muted-foreground">
             {printableTotalPeople} people · Phone numbers included
           </p>

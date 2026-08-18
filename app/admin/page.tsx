@@ -27,8 +27,22 @@ export default function AdminBookingsPage() {
   const [error, setError] = useState<string | null>(null);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [selectedCourse, setSelectedCourse] = useState("All courses");
 
   const confirmedBookings = bookings.filter((booking) => booking.paid);
+  const uniqueCourseTitles = Array.from(
+    new Set(confirmedBookings.map((booking) => booking.courseTitle)),
+  ).sort((a, b) => a.localeCompare(b));
+  const printableBookings =
+    selectedCourse === "All courses"
+      ? confirmedBookings
+      : confirmedBookings.filter(
+          (booking) => booking.courseTitle === selectedCourse,
+        );
+  const printableTotalPeople = printableBookings.reduce(
+    (sum, booking) => sum + booking.participants,
+    0,
+  );
 
   const peoplePerCourseAndCampus = confirmedBookings.reduce(
     (acc, booking) => {
@@ -257,6 +271,47 @@ export default function AdminBookingsPage() {
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && <p className="text-sm text-destructive mb-4">{error}</p>}
 
+        <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between no-print">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-foreground">
+              Select course to print
+            </label>
+            <select
+              value={selectedCourse}
+              onChange={(event) => setSelectedCourse(event.target.value)}
+              className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+            >
+              <option value="All courses">All courses</option>
+              {uniqueCourseTitles.map((courseTitle) => (
+                <option key={courseTitle} value={courseTitle}>
+                  {courseTitle}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => window.print()}
+            className="inline-flex items-center justify-center h-10 rounded-lg bg-primary px-4 text-sm font-semibold text-white hover:bg-primary/90"
+          >
+            Print attendee list
+          </button>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-border bg-card p-4 no-print">
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+            Selected print view
+          </p>
+          <p className="mt-2 text-lg font-bold text-foreground">
+            {selectedCourse}
+          </p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {printableBookings.length} paid bookings · {printableTotalPeople}{" "}
+            people
+          </p>
+        </div>
+
         <div className="mb-6 overflow-x-auto border border-border rounded-xl">
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
@@ -314,17 +369,17 @@ export default function AdminBookingsPage() {
               </tr>
             </thead>
             <tbody>
-              {bookings.length === 0 ? (
+              {printableBookings.length === 0 ? (
                 <tr>
                   <td
                     colSpan={8}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
-                    No bookings yet.
+                    No paid bookings for this course yet.
                   </td>
                 </tr>
               ) : (
-                bookings.map((booking) => (
+                printableBookings.map((booking) => (
                   <tr key={booking.id} className="border-t border-border">
                     <td className="px-4 py-3 font-medium text-foreground">
                       {booking.firstName?.trim() ||

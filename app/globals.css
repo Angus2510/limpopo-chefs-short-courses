@@ -129,3 +129,24 @@
     @apply font-sans;
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  main,
+  table,
+  thead,
+  tbody,
+  tr,
+  td,
+  th {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+}

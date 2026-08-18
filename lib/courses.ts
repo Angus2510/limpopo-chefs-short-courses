@@ -10,6 +10,15 @@ export type Campus = "Mokopane" | "Polokwane";
 
 export const CAMPUSES: Campus[] = ["Mokopane", "Polokwane"];
 
+export const COURSE_DISCLAIMER =
+  "A minimum of 10 participants is required for each course to run. If the minimum is not reached, paid bookings will be converted to a credit for the full amount paid, which may be used toward any future course. Regrettably, no refunds will be issued.";
+
+export const CLOSED_COURSE_IDS = new Set<string>(["cooking-club-aug"]);
+
+export function isCourseClosed(course: Course) {
+  return CLOSED_COURSE_IDS.has(course.id);
+}
+
 export interface Course {
   id: string;
   title: string;
@@ -144,7 +153,7 @@ export const COURSES: Course[] = [
     category: "Fundamentals",
     description:
       "Join us every month for our Budget Cooking Club. Each month, you’ll learn a new recipe, pick up new cooking skills, and enjoy a fun evening with fellow food lovers. This month’s menu is Chicken & Mushroom Ravioli made from scratch. No time to cook? No problem. Simply place your order, collect your meal, and enjoy a freshly prepared homemade dinner without the effort.",
-    duration: "Evening ",
+    duration: "Evening",
     price: 200,
     bookingChoices: [
       {

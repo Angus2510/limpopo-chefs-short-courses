@@ -30,6 +30,7 @@ export default function AdminBookingsPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("All courses");
+  const [selectedCampus, setSelectedCampus] = useState("All campuses");
   const [transferringId, setTransferringId] = useState<string | null>(null);
 
   const confirmedBookings = bookings.filter((booking) => booking.paid);
@@ -40,16 +41,79 @@ export default function AdminBookingsPage() {
   const uniqueCourseTitles = Array.from(
     new Set(confirmedBookings.map((booking) => booking.courseTitle)),
   ).sort((a, b) => a.localeCompare(b));
-  const printableBookings =
+  const bookingsFilteredByCourse =
     selectedCourse === "All courses"
       ? confirmedBookings
       : confirmedBookings.filter(
           (booking) => booking.courseTitle === selectedCourse,
         );
+  const printableBookings =
+    selectedCampus === "All campuses"
+      ? bookingsFilteredByCourse
+      : bookingsFilteredByCourse.filter(
+          (booking) => booking.campus === selectedCampus,
+        );
+  const uniqueCampuses = Array.from(
+    new Set(bookingsFilteredByCourse.map((booking) => booking.campus)),
+  ).sort();
   const printableTotalPeople = printableBookings.reduce(
     (sum, booking) => sum + booking.participants,
     0,
   );
+  const compactCourseName = (courseTitle: string) =>
+    courseTitle.length > 30
+      ? `${courseTitle.slice(0, 30).trim()}…`
+      : courseTitle;
+
+  const printSections =
+    selectedCourse === "All courses"
+      ? Array.from(
+          new Set(printableBookings.map((booking) => booking.courseTitle)),
+        ).map((courseTitle) => ({
+          courseTitle,
+          campuses: ["Mokopane", "Polokwane"].map((campus) => ({
+            campus,
+            rows: printableBookings
+              .filter(
+                (booking) =>
+                  booking.courseTitle === courseTitle && booking.campus === campus,
+              )
+              .flatMap((booking) =>
+                Array.from({ length: booking.participants }, (_, index) => ({
+                  ...booking,
+                  attendeeIndex: index + 1,
+                  attendeeName:
+                    `${booking.firstName ?? ""} ${booking.lastName ?? ""}`.trim() ||
+                    booking.bookedBy?.trim() ||
+                    "-",
+                  attendeePhone: booking.phone ?? "",
+                  isExtraGuest: index > 0,
+                })),
+              ),
+          })),
+        }))
+      : [
+          {
+            courseTitle: selectedCourse,
+            campuses: ["Mokopane", "Polokwane"].map((campus) => ({
+              campus,
+              rows: printableBookings
+                .filter((booking) => booking.campus === campus)
+                .flatMap((booking) =>
+                  Array.from({ length: booking.participants }, (_, index) => ({
+                    ...booking,
+                    attendeeIndex: index + 1,
+                    attendeeName:
+                      `${booking.firstName ?? ""} ${booking.lastName ?? ""}`.trim() ||
+                      booking.bookedBy?.trim() ||
+                      "-",
+                    attendeePhone: booking.phone ?? "",
+                    isExtraGuest: index > 0,
+                  })),
+                ),
+            })),
+          },
+        ];
 
   const peoplePerCourseAndCampus = confirmedBookings.reduce(
     (acc, booking) => {
@@ -342,6 +406,24 @@ export default function AdminBookingsPage() {
             </select>
           </div>
 
+          <div className="flex flex-col gap-1.5">
+            <label className="text-xs font-medium text-foreground">
+              Select campus to print
+            </label>
+            <select
+              value={selectedCampus}
+              onChange={(event) => setSelectedCampus(event.target.value)}
+              className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+            >
+              <option value="All campuses">All campuses</option>
+              {uniqueCampuses.map((campus) => (
+                <option key={campus} value={campus}>
+                  {campus}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <button
             type="button"
             onClick={() => window.print()}
@@ -357,6 +439,7 @@ export default function AdminBookingsPage() {
           </p>
           <p className="mt-2 text-lg font-bold text-foreground">
             {selectedCourse}
+            {selectedCampus !== "All campuses" && ` · ${selectedCampus}`}
           </p>
           <p className="mt-1 text-sm text-muted-foreground">
             {printableBookings.length} paid bookings · {printableTotalPeople}{" "}
@@ -364,16 +447,76 @@ export default function AdminBookingsPage() {
           </p>
         </div>
 
-        <div className="hidden print:block print:mb-4">
-          <h2 className="text-xl font-bold text-foreground">
-            {selectedCourse}
+        <div className="hidden print:block print:mb-6 print:break-inside-avoid">
+          <h2 className="text-2xl font-bold text-foreground">
+            {selectedCourse === "All courses" ? "Course Attendance Register" : selectedCourse}
+            {selectedCampus !== "All campuses" && ` · ${selectedCampus}`}
           </h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="mt-1 text-sm text-muted-foreground">
             {printableTotalPeople} people · Phone numbers included
           </p>
+
+          <div className="mt-4 space-y-8">
+            {printSections.map((section) => (
+              <div key={section.courseTitle} className="page-break-inside-avoid">
+                <h3 className="mb-2 text-lg font-bold text-foreground">
+                  {section.courseTitle}
+                </h3>
+
+                {section.campuses.map(({ campus, rows }) => (
+                  <div key={`${section.courseTitle}-${campus}`} className="mb-5">
+                    <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                      {campus}
+                    </h4>
+
+                    {rows.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No attendees.</p>
+                    ) : (
+                      <div className="overflow-hidden rounded-lg border border-border">
+                        <table className="w-full border-collapse text-sm">
+                          <thead className="bg-muted/50">
+                            <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
+                              <th className="border border-border px-2 py-2">Guest</th>
+                              <th className="border border-border px-2 py-2">Name</th>
+                              <th className="border border-border px-2 py-2">Phone</th>
+                              <th className="border border-border px-2 py-2">Signature</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {rows.map((row) => (
+                              <tr key={`${row.id}-${row.attendeeIndex}`} className="align-top">
+                                <td className="border border-border px-2 py-3 text-center font-semibold">
+                                  {row.attendeeIndex}
+                                </td>
+                                <td className="border border-border px-2 py-3">
+                                  {row.isExtraGuest ? "" : row.attendeeName}
+                                </td>
+                                <td className="border border-border px-2 py-3">
+                                  {row.isExtraGuest ? "" : row.attendeePhone}
+                                </td>
+                                <td className="border border-border px-2 py-3 w-48">
+                                  &nbsp;
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
         </div>
 
-        <div className="mb-6 overflow-x-auto border border-border rounded-xl">
+        <div
+          className={
+            selectedCourse === "All courses"
+              ? "mb-6 overflow-x-auto border border-border rounded-xl"
+              : "mb-6 overflow-x-auto border border-border rounded-xl print:hidden"
+          }
+        >
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
@@ -419,22 +562,22 @@ export default function AdminBookingsPage() {
           <table className="w-full text-sm">
             <thead className="bg-muted/50">
               <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
-                <th className="px-4 py-3">Booked By</th>
-                <th className="px-4 py-3">Course Booked</th>
-                <th className="px-4 py-3">Move To</th>
-                <th className="px-4 py-3">Campus</th>
-                <th className="px-4 py-3">People</th>
-                <th className="px-4 py-3">Paid</th>
-                <th className="px-4 py-3">Email</th>
-                <th className="px-4 py-3">Phone</th>
-                <th className="px-4 py-3">Booked</th>
+                <th className="px-3 py-3">Booked By</th>
+                <th className="px-3 py-3">Course</th>
+                <th className="px-3 py-3 print:hidden">Move To</th>
+                <th className="px-3 py-3">Campus</th>
+                <th className="px-3 py-3">People</th>
+                <th className="px-3 py-3 print:hidden">Paid</th>
+                <th className="px-3 py-3 print:hidden">Email</th>
+                <th className="px-3 py-3">Phone</th>
+                <th className="px-3 py-3 print:hidden">Booked</th>
               </tr>
             </thead>
             <tbody>
               {printableBookings.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={9}
+                    colSpan={8}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
                     No paid bookings for this course yet.
@@ -446,15 +589,15 @@ export default function AdminBookingsPage() {
                     key={booking.id}
                     className="border-t border-border align-top"
                   >
-                    <td className="px-4 py-3 font-medium text-foreground">
+                    <td className="px-3 py-3 font-medium text-foreground">
                       {booking.firstName?.trim() ||
                         booking.bookedBy?.trim().split(/\s+/)[0] ||
                         "-"}
                     </td>
-                    <td className="px-4 py-3 font-medium text-foreground">
-                      {booking.courseTitle}
+                    <td className="px-3 py-3 font-medium text-foreground">
+                      {compactCourseName(booking.courseTitle)}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3 print:hidden">
                       <select
                         value={booking.courseId}
                         onChange={(event) =>
@@ -470,13 +613,13 @@ export default function AdminBookingsPage() {
                         ))}
                       </select>
                     </td>
-                    <td className="px-4 py-3 text-foreground">
+                    <td className="px-3 py-3 text-foreground">
                       {booking.campus}
                     </td>
-                    <td className="px-4 py-3 text-foreground">
+                    <td className="px-3 py-3 text-foreground">
                       {booking.participants}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3 print:hidden">
                       <span
                         className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
                           booking.paid
@@ -487,13 +630,13 @@ export default function AdminBookingsPage() {
                         {booking.paid ? "Yes" : "No"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-foreground">
+                    <td className="px-3 py-3 text-foreground print:hidden">
                       {booking.email}
                     </td>
-                    <td className="px-4 py-3 text-foreground">
+                    <td className="px-3 py-3 text-foreground">
                       {booking.phone ?? "-"}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">
+                    <td className="px-3 py-3 text-muted-foreground print:hidden">
                       {new Date(booking.createdAt).toLocaleDateString("en-ZA")}
                     </td>
                   </tr>

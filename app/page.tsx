@@ -51,9 +51,7 @@ const CONFIRMED_TIMES: Record<string, string> = {
 };
 
 function isCourseAvailable(course: Course) {
-  return (
-    !isCourseClosed(course) && CURRENTLY_AVAILABLE_COURSE_IDS.has(course.id)
-  );
+  return CURRENTLY_AVAILABLE_COURSE_IDS.has(course.id);
 }
 
 function getMonthLabel(dateStr: string) {
@@ -115,30 +113,19 @@ export default function ShortCoursesPage() {
   const visible = COURSES.filter((c) => {
     const campusMatch =
       activeCampus === "All" || c.campuses.includes(activeCampus as Campus);
-    return campusMatch;
+    return campusMatch && !isCourseClosed(c);
   });
 
   const confirmedCourses = visible.filter(
-    (course) =>
-      !isCourseClosed(course) &&
-      isCourseAvailable(course) &&
-      course.availableDates.length > 0,
-  );
-
-  const closedCourses = visible.filter(
-    (course) => isCourseClosed(course) && course.availableDates.length > 0,
+    (course) => isCourseAvailable(course) && course.availableDates.length > 0,
   );
 
   const tbcCourses = visible.filter(
     (course) =>
-      !isCourseClosed(course) &&
       (!isCourseAvailable(course) || course.availableDates.length === 0),
   );
 
-  const groupedConfirmedByMonth = [
-    ...confirmedCourses,
-    ...closedCourses,
-  ].reduce(
+  const groupedConfirmedByMonth = confirmedCourses.reduce(
     (acc, course) => {
       const firstDate = [...course.availableDates].sort()[0];
       const key = firstDate.slice(0, 7);
@@ -318,11 +305,7 @@ export default function ShortCoursesPage() {
                     className="relative overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300"
                     style={{ "--card-spacing": "0px" } as React.CSSProperties}
                   >
-                    {isCourseClosed(course) ? (
-                      <Badge className="absolute top-3 right-3 z-10 bg-red-600 text-white border-red-500">
-                        Event Closed
-                      </Badge>
-                    ) : !available ? (
+                    {!available ? (
                       <Badge className="absolute top-3 right-3 z-10 bg-amber-500 text-white border-amber-400">
                         Coming Soon
                       </Badge>
@@ -405,11 +388,6 @@ export default function ShortCoursesPage() {
                       <h3 className="font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
                         {course.title}
                       </h3>
-                      {isCourseClosed(course) && (
-                        <p className="mt-2 text-[11px] font-semibold uppercase tracking-wide text-red-700">
-                          Closed — we are not taking any more bookings
-                        </p>
-                      )}
                       <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3 shrink-0" />
@@ -458,18 +436,12 @@ export default function ShortCoursesPage() {
                       <Button
                         size="sm"
                         className="rounded-[21px]"
-                        disabled={!available || isCourseClosed(course)}
+                        disabled={!available}
                         onClick={() =>
-                          available &&
-                          !isCourseClosed(course) &&
-                          setBookingCourse(course)
+                          available && setBookingCourse(course)
                         }
                       >
-                        {isCourseClosed(course)
-                          ? "Closed"
-                          : available
-                            ? "Book Now"
-                            : "Coming Soon"}
+                        {available ? "Book Now" : "Coming Soon"}
                       </Button>
                     </div>
                   </Card>

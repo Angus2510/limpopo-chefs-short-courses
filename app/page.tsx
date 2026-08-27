@@ -122,7 +122,7 @@ export default function ShortCoursesPage() {
 
   const tbcCourses = visible.filter(
     (course) =>
-      (!isCourseAvailable(course) || course.availableDates.length === 0),
+      !isCourseAvailable(course) || course.availableDates.length === 0,
   );
 
   const groupedConfirmedByMonth = confirmedCourses.reduce(
@@ -437,9 +437,7 @@ export default function ShortCoursesPage() {
                         size="sm"
                         className="rounded-[21px]"
                         disabled={!available}
-                        onClick={() =>
-                          available && setBookingCourse(course)
-                        }
+                        onClick={() => available && setBookingCourse(course)}
                       >
                         {available ? "Book Now" : "Coming Soon"}
                       </Button>

@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { Shield, LogOut, Loader2 } from "lucide-react";
 import Link from "next/link";
-import { COURSES } from "@/lib/courses";
+import { COURSES, isCourseClosed } from "@/lib/courses";
 
 type BookingRow = {
   id: string;
@@ -31,10 +31,33 @@ export default function AdminBookingsPage() {
   const [password, setPassword] = useState("");
   const [selectedCourse, setSelectedCourse] = useState("All courses");
   const [selectedCampus, setSelectedCampus] = useState("All campuses");
+  const [showClosedCourses, setShowClosedCourses] = useState(false);
   const [transferringId, setTransferringId] = useState<string | null>(null);
+  const [manualForm, setManualForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    courseId: "",
+    campus: "",
+    bookingChoiceId: "",
+    participants: "1",
+    amount: "",
+  });
+  const [manualSubmitting, setManualSubmitting] = useState(false);
+  const [manualError, setManualError] = useState<string | null>(null);
+  const [manualSuccess, setManualSuccess] = useState<string | null>(null);
 
-  const confirmedBookings = bookings.filter((booking) => booking.paid);
-  const courseOptions = COURSES.map((course) => ({
+  const visibleBookings = showClosedCourses
+    ? bookings
+    : bookings.filter((booking) => {
+        const course = COURSES.find((item) => item.id === booking.courseId);
+        return !course || !isCourseClosed(course);
+      });
+  const confirmedBookings = visibleBookings.filter((booking) => booking.paid);
+  const courseOptions = COURSES.filter(
+    (course) => showClosedCourses || !isCourseClosed(course),
+  ).map((course) => ({
     id: course.id,
     label: course.title,
   }));
@@ -279,6 +302,94 @@ export default function AdminBookingsPage() {
     }
   }
 
+  const manualSelectedCourse = COURSES.find(
+    (course) => course.id === manualForm.courseId,
+  );
+
+  function handleManualFieldChange(
+    field: keyof typeof manualForm,
+    value: string,
+  ) {
+    setManualForm((current) => {
+      const next = { ...current, [field]: value };
+
+      if (field === "courseId") {
+        const course = COURSES.find((item) => item.id === value);
+        next.campus = course?.campuses[0] ?? "";
+        next.bookingChoiceId = "";
+        next.amount = course?.bookingChoices?.length
+          ? ""
+          : course
+            ? String(course.price)
+            : "";
+      }
+
+      if (field === "bookingChoiceId") {
+        const choice = manualSelectedCourse?.bookingChoices?.find(
+          (item) => item.id === value,
+        );
+        next.amount = choice ? String(choice.price) : "";
+      }
+
+      return next;
+    });
+  }
+
+  async function handleManualSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setManualSubmitting(true);
+    setManualError(null);
+    setManualSuccess(null);
+
+    try {
+      const res = await fetch("/api/admin/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: manualForm.firstName,
+          lastName: manualForm.lastName,
+          email: manualForm.email,
+          phone: manualForm.phone || null,
+          courseId: manualForm.courseId,
+          campus: manualForm.campus,
+          bookingChoiceId: manualForm.bookingChoiceId || null,
+          participants: Number(manualForm.participants),
+          amount: Number(manualForm.amount),
+        }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(
+          (data as { error?: string }).error ?? "Could not add this booking.",
+        );
+      }
+
+      const data = (await res.json()) as { booking: BookingRow };
+      setBookings((current) => [data.booking, ...current]);
+      setManualSuccess("Booking added successfully.");
+      setManualForm({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        courseId: "",
+        campus: "",
+        bookingChoiceId: "",
+        participants: "1",
+        amount: "",
+      });
+    } catch (manualErr) {
+      setManualError(
+        manualErr instanceof Error
+          ? manualErr.message
+          : "Could not add this booking.",
+      );
+    } finally {
+      setManualSubmitting(false);
+    }
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-muted/20">
@@ -432,6 +543,229 @@ export default function AdminBookingsPage() {
           >
             Print attendee list
           </button>
+        </div>
+
+        <div className="mb-6 flex items-center justify-between rounded-xl border border-border bg-card px-4 py-3 no-print">
+          <div>
+            <p className="text-sm font-semibold text-foreground">
+              Closed courses
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Show closed-course bookings in the admin views.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowClosedCourses((current) => !current)}
+            aria-pressed={showClosedCourses}
+            className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
+              showClosedCourses
+                ? "border-primary bg-primary text-white"
+                : "border-border bg-background text-foreground hover:bg-muted"
+            }`}
+          >
+            {showClosedCourses ? "Hide closed" : "Show closed"}
+          </button>
+        </div>
+
+        <div className="mb-6 rounded-xl border border-border bg-card p-4 no-print">
+          <p className="text-sm font-semibold text-foreground mb-1">
+            Add a manual booking
+          </p>
+          <p className="text-xs text-muted-foreground mb-4">
+            Use this for people who paid in person at a campus. It will be
+            recorded as a paid booking.
+          </p>
+
+          <form
+            onSubmit={handleManualSubmit}
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-foreground">
+                First name
+              </label>
+              <input
+                type="text"
+                required
+                value={manualForm.firstName}
+                onChange={(e) =>
+                  handleManualFieldChange("firstName", e.target.value)
+                }
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Last name
+              </label>
+              <input
+                type="text"
+                required
+                value={manualForm.lastName}
+                onChange={(e) =>
+                  handleManualFieldChange("lastName", e.target.value)
+                }
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Email
+              </label>
+              <input
+                type="email"
+                required
+                value={manualForm.email}
+                onChange={(e) =>
+                  handleManualFieldChange("email", e.target.value)
+                }
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Phone (optional)
+              </label>
+              <input
+                type="tel"
+                value={manualForm.phone}
+                onChange={(e) =>
+                  handleManualFieldChange("phone", e.target.value)
+                }
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Course
+              </label>
+              <select
+                required
+                value={manualForm.courseId}
+                onChange={(e) =>
+                  handleManualFieldChange("courseId", e.target.value)
+                }
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              >
+                <option value="">Select a course</option>
+                {COURSES.map((course) => (
+                  <option key={course.id} value={course.id}>
+                    {course.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Campus
+              </label>
+              <select
+                required
+                value={manualForm.campus}
+                onChange={(e) =>
+                  handleManualFieldChange("campus", e.target.value)
+                }
+                disabled={!manualSelectedCourse}
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground disabled:opacity-60"
+              >
+                <option value="">Select a campus</option>
+                {manualSelectedCourse?.campuses.map((campus) => (
+                  <option key={campus} value={campus}>
+                    {campus}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {manualSelectedCourse?.bookingChoices?.length ? (
+              <div className="flex flex-col gap-1.5">
+                <label className="text-xs font-medium text-foreground">
+                  Booking option
+                </label>
+                <select
+                  required
+                  value={manualForm.bookingChoiceId}
+                  onChange={(e) =>
+                    handleManualFieldChange("bookingChoiceId", e.target.value)
+                  }
+                  className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+                >
+                  <option value="">Select an option</option>
+                  {manualSelectedCourse.bookingChoices.map((choice) => (
+                    <option key={choice.id} value={choice.id}>
+                      {choice.label} (R{choice.price})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Participants
+              </label>
+              <input
+                type="number"
+                min={1}
+                required
+                value={manualForm.participants}
+                onChange={(e) =>
+                  handleManualFieldChange("participants", e.target.value)
+                }
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              />
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-foreground">
+                Total amount paid (R)
+              </label>
+              <input
+                type="number"
+                min={0}
+                step="0.01"
+                required
+                value={manualForm.amount}
+                onChange={(e) =>
+                  handleManualFieldChange("amount", e.target.value)
+                }
+                className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
+              />
+            </div>
+
+            <div className="flex items-end sm:col-span-2 lg:col-span-3">
+              <button
+                type="submit"
+                disabled={manualSubmitting}
+                className="inline-flex h-10 items-center justify-center rounded-lg bg-primary px-4 text-sm font-semibold text-white hover:bg-primary/90 disabled:opacity-60"
+              >
+                {manualSubmitting ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Loader2 className="w-4 h-4 animate-spin" /> Adding...
+                  </span>
+                ) : (
+                  "Add booking"
+                )}
+              </button>
+            </div>
+
+            {manualError && (
+              <p className="text-xs text-destructive sm:col-span-2 lg:col-span-3">
+                {manualError}
+              </p>
+            )}
+            {manualSuccess && (
+              <p className="text-xs text-green-700 sm:col-span-2 lg:col-span-3">
+                {manualSuccess}
+              </p>
+            )}
+          </form>
         </div>
 
         <div className="mb-6 rounded-xl border border-border bg-card p-4 no-print">

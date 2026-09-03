@@ -272,32 +272,24 @@ export default function ShortCoursesPage() {
                   ?.filter((choice) => choice.timeLabel)
                   .map((choice) => `${choice.label}: ${choice.timeLabel}`)
                   .join(" · ");
-                const remainingText = course.bookingChoices?.length
-                  ? course.bookingChoices
-                      .map((choice) => {
-                        const remaining = selectedCampus
-                          ? (courseAvailability?.choiceCampusRemaining?.[
-                              choice.id
-                            ]?.[selectedCampus] ??
-                            courseAvailability?.choiceRemaining?.[choice.id] ??
-                            choice.maxParticipants ??
-                            course.maxParticipants)
-                          : (courseAvailability?.choiceRemaining?.[choice.id] ??
-                            choice.maxParticipants ??
-                            course.maxParticipants);
-                        return `${choice.label}: ${remaining} spots left`;
-                      })
-                      .join(" · ")
-                  : `${
-                      selectedCampus
-                        ? (courseAvailability?.campusRemaining?.[
-                            selectedCampus
-                          ] ??
-                          courseAvailability?.remaining ??
-                          course.maxParticipants)
-                        : (courseAvailability?.remaining ??
-                          course.maxParticipants)
-                    } spots left`;
+                const campuses = selectedCampus
+                  ? [selectedCampus]
+                  : course.campuses;
+                const availabilityRows = course.bookingChoices?.length
+                  ? course.bookingChoices.map((choice) => ({
+                      label: choice.label,
+                      capacity:
+                        choice.maxParticipants ?? course.maxParticipants,
+                      remainingByCampus:
+                        courseAvailability?.choiceCampusRemaining?.[choice.id],
+                    }))
+                  : [
+                      {
+                        label: "Availability",
+                        capacity: course.maxParticipants,
+                        remainingByCampus: courseAvailability?.campusRemaining,
+                      },
+                    ];
 
                 return (
                   <Card
@@ -393,17 +385,38 @@ export default function ShortCoursesPage() {
                           <Clock className="w-3 h-3 shrink-0" />
                           {course.duration}
                         </span>
-                        {available ? (
-                          <span className="flex items-center gap-1">
-                            <Users className="w-3 h-3 shrink-0" />
-                            {remainingText}
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1">
-                            <Users className="w-3 h-3 shrink-0" />
-                            {course.maxParticipants} spots left
-                          </span>
-                        )}
+                      </div>
+                      <div className="mt-2 border-t border-border pt-2 space-y-1.5">
+                        {availabilityRows.map((row) => (
+                          <div
+                            key={row.label}
+                            className="flex items-start gap-1.5 text-xs"
+                          >
+                            <Users className="mt-0.5 w-3 h-3 shrink-0 text-primary" />
+                            <span className="font-medium text-foreground shrink-0">
+                              {row.label}
+                            </span>
+                            <div className="flex flex-wrap gap-1">
+                              {campuses.map((campus) => {
+                                const remaining =
+                                  row.remainingByCampus?.[campus] ??
+                                  row.capacity;
+                                const campusLabel =
+                                  campuses.length > 1 ? `${campus}: ` : "";
+
+                                return (
+                                  <span
+                                    key={campus}
+                                    className="bg-muted px-1.5 py-0.5 text-muted-foreground"
+                                  >
+                                    {campusLabel}
+                                    {remaining} spots left
+                                  </span>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                       <ScrollArea className="mt-3 h-22 pr-2">
                         <p className="text-sm text-muted-foreground leading-relaxed">

@@ -13,7 +13,10 @@ export const CAMPUSES: Campus[] = ["Mokopane", "Polokwane"];
 export const COURSE_DISCLAIMER =
   "A minimum of 10 participants is required for each course to run. If the minimum is not reached, paid bookings will be converted to a credit for the full amount paid, which may be used toward any future course. Regrettably, no refunds will be issued.";
 
-export const CLOSED_COURSE_IDS = new Set<string>(["cooking-club-aug"]);
+export const CLOSED_COURSE_IDS = new Set<string>([
+  "cooking-club-aug",
+  "macaron-class-polokwane",
+]);
 
 export function isCourseClosed(course: Course) {
   return CLOSED_COURSE_IDS.has(course.id);

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { CAMPUSES, COURSES, type Campus } from "@/lib/courses";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 type AvailabilityByCourse = Record<
   string,
   {
@@ -30,7 +33,10 @@ export async function GET() {
       (booking) => booking.courseId === course.id,
     );
 
-    const campusRemaining = CAMPUSES.reduce(
+    const courseCampuses = CAMPUSES.filter((campus) =>
+      course.campuses.includes(campus),
+    );
+    const campusRemaining = courseCampuses.reduce(
       (acc, campus) => {
         const paidForCampus = bookingsForCourse
           .filter((booking) => booking.campus === campus)
@@ -43,7 +49,7 @@ export async function GET() {
     );
 
     const courseAvailability: AvailabilityByCourse[string] = {
-      // Backward-compatible summary: best remaining across campuses.
+      // Summary for the campus selector; only campuses offering this course count.
       remaining: Math.max(...Object.values(campusRemaining), 0),
       campusRemaining,
     };
@@ -54,7 +60,7 @@ export async function GET() {
 
       for (const choice of course.bookingChoices) {
         const choiceCapacity = choice.maxParticipants ?? course.maxParticipants;
-        const campusChoiceRemaining = CAMPUSES.reduce(
+        const campusChoiceRemaining = courseCampuses.reduce(
           (acc, campus) => {
             const paidForCampusChoice = bookingsForCourse
               .filter(
@@ -71,7 +77,7 @@ export async function GET() {
         );
 
         choiceCampusRemaining[choice.id] = campusChoiceRemaining;
-        // Backward-compatible summary: best remaining across campuses.
+        // Summary for the campus selector; only campuses offering this course count.
         choiceRemaining[choice.id] = Math.max(
           ...Object.values(campusChoiceRemaining),
           0,

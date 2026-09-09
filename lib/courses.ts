@@ -210,10 +210,10 @@ export const COURSES: Course[] = [
     category: "Baking",
     description:
       "Learn how to create bakery-style gourmet cookies using one versatile dough and four delicious flavour variations. You'll leave with 16 freshly baked cookies and the confidence to recreate them at home.",
-    duration: "1 Day (8 hrs)",
-    price: 750,
-    availableDates: ["2026-09-19"],
-    maxParticipants: 14,
+    duration: "1 Day ",
+    price: 550,
+    availableDates: ["2026-11-07"],
+    maxParticipants: 30,
     instructor: "Chef Breyton, Chef Kelly ",
     includes: [
       "All ingredients",

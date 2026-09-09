@@ -260,6 +260,27 @@ export const COURSES: Course[] = [
     campuses: ["Polokwane"],
   },
   {
+    id: "gourmet-cookies-mokopane",
+    title: "Gourmet Filled Cookies",
+    category: "Baking",
+    description:
+      "Learn how to create bakery-style gourmet cookies using one versatile dough and four delicious flavour variations. You'll leave with 16 freshly baked cookies and the confidence to recreate them at home.",
+    duration: "1 Day ",
+    price: 550,
+    availableDates: ["2026-11-14"],
+    maxParticipants: 30,
+    instructor: "Chef Breyton, Chef Kelly ",
+    includes: [
+      "All ingredients",
+      "Chef's apron",
+      "Recipe booklet",
+      "Filled cookies to take home",
+    ],
+    emoji: "🍪",
+    cardImage: "/cookie.jpeg",
+    campuses: ["Mokopane"],
+  },
+  {
     id: "potjie-competition",
     title: "Potjie Competition",
     category: "Events & Experiences",

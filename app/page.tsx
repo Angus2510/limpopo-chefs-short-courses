@@ -43,6 +43,7 @@ const CURRENTLY_AVAILABLE_COURSE_IDS = new Set<string>([
   "macaron-class-polokwane", // Macaron Class - Polokwane
   "macaron-class-mokopane", // Macaron Class - Mokopane
   "gourmet-cookies", // Gourmet Filled Cookies - Polokwane
+  "gourmet-cookies-mokopane", // Gourmet Filled Cookies - Mokopane
   "sushi-class", // Sushi Class - Polokwane
   "sushi-class-mokopane", // Sushi Class - Mokopane
 ]);
@@ -54,6 +55,7 @@ const CONFIRMED_TIMES: Record<string, string> = {
   "macaron-class-polokwane": "09:00",
   "macaron-class-mokopane": "09:00",
   "gourmet-cookies": "09:00",
+  "gourmet-cookies-mokopane": "09:00",
   "sushi-class": "09:00",
   "sushi-class-mokopane": "09:00",
 };

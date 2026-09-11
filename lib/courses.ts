@@ -16,6 +16,7 @@ export const COURSE_DISCLAIMER =
 export const CLOSED_COURSE_IDS = new Set<string>([
   "cooking-club-aug",
   "macaron-class-polokwane",
+  "macaron-class-mokopane",
 ]);
 
 export function isCourseClosed(course: Course) {

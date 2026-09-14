@@ -948,8 +948,8 @@ export default function AdminBookingsPage() {
                     className="border-t border-border align-top"
                   >
                     <td className="px-3 py-3 font-medium text-foreground">
-                      {booking.firstName?.trim() ||
-                        booking.bookedBy?.trim().split(/\s+/)[0] ||
+                      {`${booking.firstName ?? ""} ${booking.lastName ?? ""}`.trim() ||
+                        booking.bookedBy?.trim() ||
                         "-"}
                     </td>
                     <td className="px-3 py-3 font-medium text-foreground">

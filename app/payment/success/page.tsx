@@ -11,10 +11,37 @@ export default async function PaymentSuccessPage({
   const { ref } = await searchParams;
 
   if (ref) {
-    await prisma.booking.updateMany({
+    const pendingBooking = await prisma.booking.findFirst({
       where: { clientReferenceId: ref, status: "pending" },
-      data: { status: "paid" },
     });
+
+    // Confirm with Yoco directly rather than trusting the redirect alone.
+    if (pendingBooking?.yocoCheckoutId && process.env.YOCO_SECRET_KEY) {
+      try {
+        const res = await fetch(
+          `https://payments.yoco.com/api/checkouts/${pendingBooking.yocoCheckoutId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${process.env.YOCO_SECRET_KEY}`,
+            },
+            cache: "no-store",
+          },
+        );
+        const checkout = await res.json().catch(() => ({}));
+
+        if (res.ok && checkout.status === "completed") {
+          await prisma.booking.update({
+            where: { id: pendingBooking.id },
+            data: {
+              status: "paid",
+              yocoPaymentId: checkout.paymentId ?? pendingBooking.yocoPaymentId,
+            },
+          });
+        }
+      } catch (err) {
+        console.error("[payment/success] Yoco verification failed:", err);
+      }
+    }
   }
 
   const booking = ref

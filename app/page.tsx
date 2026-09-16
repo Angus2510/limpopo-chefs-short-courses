@@ -10,7 +10,6 @@ import { Separator } from "@/components/ui/separator";
 import { BookingSheet } from "@/components/booking-sheet";
 import {
   COURSES,
-  CAMPUSES,
   COURSE_DISCLAIMER,
   formatPrice,
   isCourseClosed,
@@ -92,7 +91,6 @@ type AvailabilityMap = Record<
 >;
 
 export default function ShortCoursesPage() {
-  const [activeCampus, setActiveCampus] = useState<Campus | "All">("All");
   const [bookingCourse, setBookingCourse] = useState<Course | null>(null);
   const [availability, setAvailability] = useState<AvailabilityMap>({});
 
@@ -120,11 +118,7 @@ export default function ShortCoursesPage() {
     };
   }, []);
 
-  const visible = COURSES.filter((c) => {
-    const campusMatch =
-      activeCampus === "All" || c.campuses.includes(activeCampus as Campus);
-    return campusMatch && !isCourseClosed(c);
-  });
+  const visible = COURSES.filter((course) => !isCourseClosed(course));
 
   const confirmedCourses = visible.filter(
     (course) => isCourseAvailable(course) && course.availableDates.length > 0,
@@ -243,23 +237,6 @@ export default function ShortCoursesPage() {
 
       {/* ── Courses ── */}
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
-        {/* Campus filter */}
-        <div className="flex items-center gap-2 mb-10">
-          <MapPin className="w-3.5 h-3.5 text-muted-foreground" />
-          <span className="text-xs text-muted-foreground mr-1">Campus:</span>
-          {(["All", ...CAMPUSES] as Array<"All" | Campus>).map((c) => (
-            <Button
-              key={c}
-              variant={activeCampus === c ? "default" : "outline"}
-              size="sm"
-              className="rounded-[21px]"
-              onClick={() => setActiveCampus(c)}
-            >
-              {c === "All" ? "Both" : c}
-            </Button>
-          ))}
-        </div>
-
         {sections.map((section) => (
           <section key={section.key} className="mb-10 last:mb-0">
             <div className="mb-4">
@@ -270,8 +247,6 @@ export default function ShortCoursesPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {section.courses.map((course) => {
-                const selectedCampus =
-                  activeCampus === "All" ? null : activeCampus;
                 const available = isCourseAvailable(course);
                 const nextDate = [...course.availableDates].sort()[0] ?? null;
                 const dateParts =
@@ -282,9 +257,7 @@ export default function ShortCoursesPage() {
                   ?.filter((choice) => choice.timeLabel)
                   .map((choice) => `${choice.label}: ${choice.timeLabel}`)
                   .join(" · ");
-                const campuses = selectedCampus
-                  ? [selectedCampus]
-                  : course.campuses;
+                const campuses = course.campuses;
                 const availabilityRows = course.bookingChoices?.length
                   ? course.bookingChoices.map((choice) => ({
                       label: choice.label,
@@ -538,7 +511,6 @@ export default function ShortCoursesPage() {
         course={bookingCourse}
         open={bookingCourse !== null}
         onClose={() => setBookingCourse(null)}
-        defaultCampus={activeCampus === "All" ? null : activeCampus}
       />
     </div>
   );

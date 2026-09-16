@@ -55,6 +55,7 @@ export default function AdminBookingsPage() {
         return !course || !isCourseClosed(course);
       });
   const confirmedBookings = visibleBookings.filter((booking) => booking.paid);
+  const allConfirmedBookings = bookings.filter((booking) => booking.paid);
   const courseOptions = COURSES.filter(
     (course) => showClosedCourses || !isCourseClosed(course),
   ).map((course) => ({
@@ -62,8 +63,16 @@ export default function AdminBookingsPage() {
     label: course.title,
   }));
   const uniqueCourseTitles = Array.from(
-    new Set(confirmedBookings.map((booking) => booking.courseTitle)),
+    new Set(allConfirmedBookings.map((booking) => booking.courseTitle)),
   ).sort((a, b) => a.localeCompare(b));
+  const closedCourseTitles = new Set(
+    allConfirmedBookings
+      .filter((booking) => {
+        const course = COURSES.find((item) => item.id === booking.courseId);
+        return course ? isCourseClosed(course) : false;
+      })
+      .map((booking) => booking.courseTitle),
+  );
   const bookingsFilteredByCourse =
     selectedCourse === "All courses"
       ? confirmedBookings
@@ -506,13 +515,22 @@ export default function AdminBookingsPage() {
             </label>
             <select
               value={selectedCourse}
-              onChange={(event) => setSelectedCourse(event.target.value)}
+              onChange={(event) => {
+                const nextCourse = event.target.value;
+                setSelectedCourse(nextCourse);
+
+                if (closedCourseTitles.has(nextCourse)) {
+                  setShowClosedCourses(true);
+                }
+              }}
               className="h-10 rounded-lg border border-border bg-background px-3 text-sm text-foreground"
             >
               <option value="All courses">All courses</option>
               {uniqueCourseTitles.map((courseTitle) => (
                 <option key={courseTitle} value={courseTitle}>
-                  {courseTitle}
+                  {closedCourseTitles.has(courseTitle)
+                    ? `${courseTitle} (Closed)`
+                    : courseTitle}
                 </option>
               ))}
             </select>
@@ -556,7 +574,17 @@ export default function AdminBookingsPage() {
           </div>
           <button
             type="button"
-            onClick={() => setShowClosedCourses((current) => !current)}
+            onClick={() => {
+              setShowClosedCourses((current) => {
+                const nextValue = !current;
+
+                if (!nextValue && closedCourseTitles.has(selectedCourse)) {
+                  setSelectedCourse("All courses");
+                }
+
+                return nextValue;
+              });
+            }}
             aria-pressed={showClosedCourses}
             className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${
               showClosedCourses

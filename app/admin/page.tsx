@@ -575,15 +575,12 @@ export default function AdminBookingsPage() {
           <button
             type="button"
             onClick={() => {
-              setShowClosedCourses((current) => {
-                const nextValue = !current;
+              const nextValue = !showClosedCourses;
+              setShowClosedCourses(nextValue);
 
-                if (!nextValue && closedCourseTitles.has(selectedCourse)) {
-                  setSelectedCourse("All courses");
-                }
-
-                return nextValue;
-              });
+              if (!nextValue && closedCourseTitles.has(selectedCourse)) {
+                setSelectedCourse("All courses");
+              }
             }}
             aria-pressed={showClosedCourses}
             className={`rounded-lg border px-3 py-2 text-sm font-semibold transition-colors ${

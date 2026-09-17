@@ -1,5 +1,4 @@
 import { Resend } from "resend";
-import { readFile } from "node:fs/promises";
 import { formatDate, formatPrice } from "@/lib/courses";
 
 type BookingConfirmation = {
@@ -39,14 +38,7 @@ export async function sendBookingConfirmation(booking: BookingConfirmation) {
   const reference = booking.id;
   const formattedDate = formatDate(booking.date);
   const formattedAmount = formatPrice(booking.amount / 100);
-  let logoDataUrl: string | null = null;
-
-  try {
-    const logo = await readFile("public/logo.png");
-    logoDataUrl = `data:image/png;base64,${logo.toString("base64")}`;
-  } catch (error) {
-    console.warn("[booking-confirmation-email] Could not load logo:", error);
-  }
+  const logoUrl = process.env.RESEND_LOGO_URL?.trim();
   const supportContacts = [
     {
       name: "Mokopane Campus",
@@ -66,9 +58,6 @@ export async function sendBookingConfirmation(booking: BookingConfirmation) {
     `Hello ${customerName},`,
     "",
     "Your booking is confirmed.",
-    "",
-    `Course: ${booking.courseTitle}`,
-    `Campus: ${booking.campus}`,
     `Date: ${formattedDate}`,
     `Participants: ${booking.participants}`,
     `Total paid: ${formattedAmount}`,
@@ -89,7 +78,7 @@ export async function sendBookingConfirmation(booking: BookingConfirmation) {
   const html = `
     <div style="margin:0;background:#f3f3f3;padding:32px 16px;font-family:Arial,sans-serif;color:#131313">
       <div style="max-width:560px;margin:0 auto;background:#ffffff;border:1px solid #e5e5e5;border-radius:12px;overflow:hidden">
-        ${logoDataUrl ? `<div style="background:#ffffff;padding:20px 24px 8px;text-align:center"><img src="${logoDataUrl}" alt="Limpopo Chefs Academy" style="display:block;width:220px;max-width:100%;height:auto;margin:0 auto" /></div>` : ""}
+        ${logoUrl ? `<div style="background:#ffffff;padding:20px 24px 8px;text-align:center"><img src="${escapeHtml(logoUrl)}" alt="Limpopo Chefs Academy" width="220" style="display:block;width:220px;max-width:100%;height:auto;margin:0 auto" /></div>` : `<div style="background:#ffffff;padding:20px 24px 8px;text-align:center;font-size:18px;font-weight:700;color:#315631">Limpopo Chefs Academy</div>`}
         <div style="background:#315631;padding:24px;color:#ffffff">
           <p style="margin:0 0 8px;font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:.75">Limpopo Chefs Academy</p>
           <h1 style="margin:0;font-size:24px;line-height:1.25">Your booking is confirmed</h1>

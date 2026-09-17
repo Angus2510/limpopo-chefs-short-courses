@@ -413,6 +413,40 @@ export const COURSES: Course[] = [
 
   // ── November 2026 ──────────────────────────────────────────────────────────
   {
+    id: "cooking-club-nov",
+    title: "3rd Wednesday Cooking Club: Thai Green Curry",
+    category: "Fundamentals",
+    description:
+      "Join us every month for our Budget Cooking Club. Each month, you’ll learn a new recipe, pick up new cooking skills, and enjoy a fun evening with fellow food lovers. This month’s menu is Thai Green Curry. No time to cook? No problem. Simply place your order, collect your meal, and enjoy a freshly prepared homemade dinner without the effort.",
+    duration: "Evening",
+    price: 200,
+    bookingChoices: [
+      {
+        id: "cook-with-class",
+        label: "Cook with class",
+        price: 275,
+        maxParticipants: 18,
+        timeLabel: "Starts at 17:30",
+        note: "Hands-on cooking session",
+      },
+      {
+        id: "takeaway",
+        label: "Takeaway order",
+        price: 200,
+        maxParticipants: 50,
+        timeLabel: "Collection between 18:00-20:00",
+        note: "Order for collection",
+      },
+    ],
+    availableDates: ["2026-11-18"],
+    maxParticipants: 20,
+    instructor: "Chef Kelly",
+    includes: ["All ingredients", "Tasting portions", "Recipe card"],
+    emoji: "🍛",
+    cardImage: "/thai-green.jpeg",
+    campuses: ["Polokwane", "Mokopane"],
+  },
+  {
     id: "christmas-cake",
     title: "Christmas Cake Lesson",
     category: "Baking",

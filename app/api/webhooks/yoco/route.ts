@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { sendBookingConfirmation } from "@/lib/booking-confirmation-email";
 import { createHmac, timingSafeEqual } from "crypto";
 
 // Yoco Checkout API webhook handler
@@ -119,6 +120,20 @@ export async function POST(req: NextRequest) {
         },
         data: { status: "paid", yocoPaymentId: paymentId },
       });
+
+      if (updated.count > 0) {
+        const booking = await prisma.booking.findFirst({
+          where: {
+            ...whereForClientReferenceId(clientReferenceId),
+            status: "paid",
+          },
+        });
+
+        if (booking) {
+          await sendBookingConfirmation(booking);
+        }
+      }
+
       console.log(
         `[yoco-webhook] payment.succeeded — updated ${updated.count} booking(s) for ref ${clientReferenceId}`,
       );

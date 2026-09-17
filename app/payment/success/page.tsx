@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { CheckCircle2, ChefHat, Calendar, MapPin, Users } from "lucide-react";
 import { formatDate, formatPrice } from "@/lib/courses";
+import { sendBookingConfirmation } from "@/lib/booking-confirmation-email";
 
 export default async function PaymentSuccessPage({
   searchParams,
@@ -30,13 +31,15 @@ export default async function PaymentSuccessPage({
         const checkout = await res.json().catch(() => ({}));
 
         if (res.ok && checkout.status === "completed") {
-          await prisma.booking.update({
+          const confirmedBooking = await prisma.booking.update({
             where: { id: pendingBooking.id },
             data: {
               status: "paid",
               yocoPaymentId: checkout.paymentId ?? pendingBooking.yocoPaymentId,
             },
           });
+
+          await sendBookingConfirmation(confirmedBooking);
         }
       } catch (err) {
         console.error("[payment/success] Yoco verification failed:", err);

@@ -38,7 +38,7 @@ export async function sendBookingConfirmation(booking: BookingConfirmation) {
   const reference = booking.id;
   const formattedDate = formatDate(booking.date);
   const formattedAmount = formatPrice(booking.amount / 100);
-  const logoUrl = process.env.RESEND_LOGO_URL?.trim();
+  const logoUrl = "https://shortcourses.limpopochefs.co.za/logo.png";
   const supportContacts = [
     {
       name: "Mokopane Campus",

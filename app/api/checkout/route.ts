@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { COURSES } from "@/lib/courses";
+import { COURSES, isCourseClosed } from "@/lib/courses";
 import { randomUUID } from "crypto";
 
 export async function POST(req: NextRequest) {
@@ -60,6 +60,13 @@ export async function POST(req: NextRequest) {
     const course = COURSES.find((item) => item.id === String(courseId));
     if (!course) {
       return NextResponse.json({ error: "Invalid course" }, { status: 400 });
+    }
+
+    if (isCourseClosed(course)) {
+      return NextResponse.json(
+        { error: "This course is closed for bookings." },
+        { status: 409 },
+      );
     }
 
     const normalizedChoiceId = bookingChoiceId ? String(bookingChoiceId) : null;

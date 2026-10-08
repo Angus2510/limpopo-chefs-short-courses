@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "report:attendance": "node scripts/attendance-report.js",
+    "reconcile:payments": "node scripts/reconcile-pending-payments.js",
     "postinstall": "prisma generate"
   },
   "dependencies": {

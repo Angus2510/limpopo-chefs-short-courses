@@ -19,6 +19,7 @@ export const CLOSED_COURSE_IDS = new Set<string>([
   "macaron-class-polokwane",
   "macaron-class-mokopane",
   "sushi-class",
+  "sushi-class-mokopane",
 ]);
 
 export function isCourseClosed(course: Course) {

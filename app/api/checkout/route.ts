@@ -62,6 +62,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid course" }, { status: 400 });
     }
 
+    if (course.campuses.length > 0 && !course.campuses.includes(campus)) {
+      return NextResponse.json(
+        { error: "This course is not offered at the selected campus." },
+        { status: 400 },
+      );
+    }
+
     if (isCourseClosed(course)) {
       return NextResponse.json(
         { error: "This course is closed for bookings." },

@@ -220,7 +220,7 @@ export const COURSES: Course[] = [
     includes: ["All ingredients", "Tasting portions", "Recipe card"],
     emoji: "🍗",
     cardImage: "/chicky-parm.jpeg",
-    campuses: ["Polokwane", "Mokopane"],
+    campuses: ["Mokopane"],
   },
   {
     id: "secret-supper",

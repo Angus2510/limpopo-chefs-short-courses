@@ -16,6 +16,7 @@ export const COURSE_DISCLAIMER =
 export const CLOSED_COURSE_IDS = new Set<string>([
   "cooking-club-aug",
   "cooking-club-sep",
+  "cooking-club-oct",
   "macaron-class-polokwane",
   "macaron-class-mokopane",
   "sushi-class",

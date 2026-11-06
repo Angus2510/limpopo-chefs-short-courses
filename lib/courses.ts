@@ -19,6 +19,7 @@ export const CLOSED_COURSE_IDS = new Set<string>([
   "cooking-club-oct",
   "macaron-class-polokwane",
   "macaron-class-mokopane",
+  "gourmet-cookies",
   "sushi-class",
   "sushi-class-mokopane",
 ]);

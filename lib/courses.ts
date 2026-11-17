@@ -534,7 +534,7 @@ export const COURSES: Course[] = [
     title: "Bites for Flights – Support Keabetswe's Journey",
     category: "Baking",
     description:
-      "Keabetswe, a talented student from Limpopo Chefs Academy, has been selected to compete in the Young Chefs Olympiad in India.\n\nHelp us support her journey by purchasing a box of 6 gourmet cookies, each with a unique flavour ( Biscoff, Nutella Choc-Chip, Cookies & Cream, Salted Caramel, Lemon Cheesecake, Smores) for R295.00 orders available at Mokopane and Polokwane Campus \n\nEvery box purchased brings Keabetswe one step closer to representing South Africa on the international stage.\n\nA sweet treat for you, a big opportunity for her.",
+      "Keabetswe, a talented student from Limpopo Chefs Academy, has been selected to compete in the Young Chefs Olympiad in India.\n\nHelp us support her journey by purchasing a box of 6 gourmet cookies, each with a unique flavour (Biscoff, Nutella Choc-Chip, Cookies & Cream, Salted Caramel, Lemon Cheesecake, Smores) for R295.00, orders available at Mokopane and Polokwane Campus.\n\nEvery box purchased brings Keabetswe one step closer to representing South Africa on the international stage.\n\nA sweet treat for you, a big opportunity for her.",
     duration: "Cookie fundraiser",
     price: 295,
     bookingDeadline: "2026-12-02",

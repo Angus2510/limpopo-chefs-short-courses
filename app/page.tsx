@@ -346,7 +346,7 @@ export default function ShortCoursesPage() {
                           </p>
                           <p className="mt-1 text-sm text-muted-foreground">
                             Six cookie flavours in every box · Collect from
-                            Mokopane or Polokwane
+                            Mokopane or Polokwane campus
                           </p>
                         </div>
                       ) : dateParts ? (

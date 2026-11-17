@@ -88,7 +88,9 @@ export function BookingSheet({
   const safeParticipants = Number.isFinite(participants) ? participants : 1;
   const total = safePricePerPerson * safeParticipants;
   const selectedCapacity =
-    selectedBookingChoice?.maxParticipants ?? course?.maxParticipants ?? 0;
+    selectedBookingChoice?.maxParticipants ??
+    course?.maxParticipants ??
+    Number.POSITIVE_INFINITY;
   const selectedRemaining = Math.max(
     availability
       ? selectedBookingChoice
@@ -172,7 +174,7 @@ export function BookingSheet({
             ? `${course.title} (${selectedBookingChoice.label})`
             : course.title,
           campus,
-          date: selectedDate,
+          date: selectedDate ?? course.bookingDeadline ?? null,
           participants,
           pricePerPerson: safePricePerPerson,
           bookingChoiceId: selectedBookingChoice?.id,
@@ -251,7 +253,9 @@ export function BookingSheet({
             </Badge>
             <Badge className="bg-white/20 text-white border-white/30 text-[10px] flex items-center gap-1">
               <Users className="w-2.5 h-2.5" />
-              {selectedRemaining} spots left
+              {Number.isFinite(selectedRemaining)
+                ? `${selectedRemaining} spots left`
+                : "No box limit"}
             </Badge>
           </div>
         </div>
@@ -298,9 +302,17 @@ export function BookingSheet({
             {/* ── Date selection ── */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">
-                Choose a Date
+                {activeCourse.bookingDeadline
+                  ? "Order deadline"
+                  : "Choose a Date"}
               </h3>
-              {activeCourse.availableDates.length === 0 ? (
+              {activeCourse.bookingDeadline ? (
+                <div className="bg-muted rounded-lg p-4 text-center">
+                  <p className="text-sm font-medium text-foreground">
+                    Order by {formatDate(activeCourse.bookingDeadline)}
+                  </p>
+                </div>
+              ) : activeCourse.availableDates.length === 0 ? (
                 <div className="bg-muted rounded-lg p-4 text-center space-y-1">
                   <p className="text-sm font-medium text-foreground">
                     Dates to be confirmed
@@ -363,7 +375,10 @@ export function BookingSheet({
                           </p>
                           <div className="text-right">
                             <p className="text-sm font-bold text-primary">
-                              {formatPrice(choice.price)} pp
+                              {formatPrice(choice.price)}{" "}
+                              {activeCourse.bookingUnit
+                                ? `per ${activeCourse.bookingUnit.singular}`
+                                : "pp"}
                             </p>
                             <p className="text-[11px] text-muted-foreground">
                               {(campus
@@ -372,8 +387,14 @@ export function BookingSheet({
                                   ]?.[campus]
                                 : availability?.choiceRemaining?.[choice.id]) ??
                                 choice.maxParticipants ??
-                                activeCourse.maxParticipants}{" "}
-                              spots left
+                                activeCourse.maxParticipants ??
+                                "No limit"}
+                              {Number.isFinite(
+                                choice.maxParticipants ??
+                                  activeCourse.maxParticipants,
+                              )
+                                ? " spots left"
+                                : ""}
                             </p>
                           </div>
                         </div>
@@ -396,10 +417,12 @@ export function BookingSheet({
               </>
             )}
 
-            {/* ── Participants ── */}
+            {/* ── Quantity ── */}
             <div>
               <h3 className="text-sm font-semibold text-foreground mb-3">
-                Participants
+                {activeCourse.bookingUnit
+                  ? `Number of ${activeCourse.bookingUnit.plural}`
+                  : "Participants"}
               </h3>
               <div className="flex items-center gap-4">
                 <button
@@ -414,7 +437,9 @@ export function BookingSheet({
                     {participants}
                   </span>
                   <p className="text-[10px] text-muted-foreground leading-none mt-0.5">
-                    {participants === 1 ? "person" : "people"}
+                    {participants === 1
+                      ? (activeCourse.bookingUnit?.singular ?? "person")
+                      : (activeCourse.bookingUnit?.plural ?? "people")}
                   </p>
                 </div>
                 <button
@@ -428,9 +453,11 @@ export function BookingSheet({
                 >
                   <Plus className="w-4 h-4" />
                 </button>
-                <span className="text-xs text-muted-foreground">
-                  ({selectedRemaining} spots left)
-                </span>
+                {Number.isFinite(selectedRemaining) ? (
+                  <span className="text-xs text-muted-foreground">
+                    ({selectedRemaining} spots left)
+                  </span>
+                ) : null}
               </div>
               {selectedRemaining === 0 && (
                 <p className="text-xs text-destructive mt-2">
@@ -531,7 +558,9 @@ export function BookingSheet({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
                   {formatPrice(pricePerPerson)} &times; {participants}{" "}
-                  {participants === 1 ? "person" : "people"}
+                  {participants === 1
+                    ? (activeCourse.bookingUnit?.singular ?? "person")
+                    : (activeCourse.bookingUnit?.plural ?? "people")}
                 </span>
                 <span className="font-medium text-foreground">
                   {formatPrice(total)}

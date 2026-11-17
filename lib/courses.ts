@@ -24,11 +24,17 @@ export const CLOSED_COURSE_IDS = new Set<string>([
   "gourmet-cookies-mokopane",
   "sushi-class",
   "sushi-class-mokopane",
-  
 ]);
 
 export function isCourseClosed(course: Course) {
-  return CLOSED_COURSE_IDS.has(course.id);
+  if (CLOSED_COURSE_IDS.has(course.id)) return true;
+  if (!course.bookingDeadline) return false;
+
+  const todayInSouthAfrica = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Africa/Johannesburg",
+  });
+
+  return todayInSouthAfrica > course.bookingDeadline;
 }
 
 export interface Course {
@@ -38,6 +44,11 @@ export interface Course {
   description: string;
   duration: string;
   price: number;
+  bookingDeadline?: string;
+  bookingUnit?: {
+    singular: string;
+    plural: string;
+  };
   bookingChoices?: Array<{
     id: string;
     label: string;
@@ -47,7 +58,7 @@ export interface Course {
     note?: string;
   }>;
   availableDates: string[]; // ISO: YYYY-MM-DD — empty means TBC
-  maxParticipants: number;
+  maxParticipants?: number;
   instructor: string;
   includes: string[];
   emoji: string;
@@ -517,6 +528,30 @@ export const COURSES: Course[] = [
     emoji: "⭐",
     cardImage: "/pastry-adv.png",
     campuses: ["Polokwane"],
+  },
+  {
+    id: "keabetswe-india-cookie-fundraiser",
+    title: "Bites for Flights – Support Keabetswe's Journey",
+    category: "Baking",
+    description:
+      "Keabetswe, a talented student from Limpopo Chefs Academy, has been selected to compete in the Young Chefs Olympiad in India.\n\nHelp us support her journey by purchasing a box of 6 gourmet cookies, each with a unique flavour ( Biscoff, Nutella Choc-Chip, Cookies & Cream, Salted Caramel, Lemon Cheesecake, Smores) for R295.00 orders available at Mokopane and Polokwane Campus \n\nEvery box purchased brings Keabetswe one step closer to representing South Africa on the international stage.\n\nA sweet treat for you, a big opportunity for her.",
+    duration: "Cookie fundraiser",
+    price: 295,
+    bookingDeadline: "2026-12-02",
+    bookingUnit: {
+      singular: "box",
+      plural: "boxes",
+    },
+    availableDates: [],
+    instructor: "Keabetswe",
+    includes: [
+      "Six different cookie flavours",
+      "Collection from your selected campus",
+      "All proceeds support Keabetswe's travel and accommodation in India",
+    ],
+    emoji: "🍪",
+    cardImage: "/bites.png",
+    campuses: ["Mokopane", "Polokwane"],
   },
 ];
 

@@ -11,6 +11,7 @@ import { BookingSheet } from "@/components/booking-sheet";
 import {
   COURSES,
   COURSE_DISCLAIMER,
+  formatDate,
   formatPrice,
   isCourseClosed,
   type Course,
@@ -46,6 +47,7 @@ const CURRENTLY_AVAILABLE_COURSE_IDS = new Set<string>([
   "gourmet-cookies-mokopane", // Gourmet Filled Cookies - Mokopane
   "sushi-class", // Sushi Class - Polokwane
   "sushi-class-mokopane", // Sushi Class - Mokopane
+  "keabetswe-india-cookie-fundraiser", // Keabetswe's India cookie fundraiser
 ]);
 
 const CONFIRMED_TIMES: Record<string, string> = {
@@ -123,17 +125,21 @@ export default function ShortCoursesPage() {
   const visible = COURSES.filter((course) => !isCourseClosed(course));
 
   const confirmedCourses = visible.filter(
-    (course) => isCourseAvailable(course) && course.availableDates.length > 0,
+    (course) =>
+      isCourseAvailable(course) &&
+      (course.availableDates.length > 0 || course.bookingDeadline),
   );
 
   const tbcCourses = visible.filter(
     (course) =>
-      !isCourseAvailable(course) || course.availableDates.length === 0,
+      !isCourseAvailable(course) ||
+      (course.availableDates.length === 0 && !course.bookingDeadline),
   );
 
   const groupedConfirmedByMonth = confirmedCourses.reduce(
     (acc, course) => {
-      const firstDate = [...course.availableDates].sort()[0];
+      const firstDate =
+        [...course.availableDates].sort()[0] ?? course.bookingDeadline!;
       const key = firstDate.slice(0, 7);
       const label = getMonthLabel(firstDate);
 
@@ -252,7 +258,9 @@ export default function ShortCoursesPage() {
                 const available = isCourseAvailable(course);
                 const nextDate = [...course.availableDates].sort()[0] ?? null;
                 const dateParts =
-                  !section.isTbc && nextDate ? getDateParts(nextDate) : null;
+                  !course.bookingDeadline && !section.isTbc && nextDate
+                    ? getDateParts(nextDate)
+                    : null;
                 const timeLabel = CONFIRMED_TIMES[course.id];
                 const courseAvailability = availability[course.id];
                 const choiceTimeText = course.bookingChoices
@@ -261,25 +269,37 @@ export default function ShortCoursesPage() {
                   .join(" · ");
                 const campuses = course.campuses;
                 const availabilityRows = course.bookingChoices?.length
-                  ? course.bookingChoices.map((choice) => ({
-                      label: choice.label,
-                      capacity:
-                        choice.maxParticipants ?? course.maxParticipants,
-                      remainingByCampus:
-                        courseAvailability?.choiceCampusRemaining?.[choice.id],
-                    }))
-                  : [
-                      {
-                        label: "Availability",
-                        capacity: course.maxParticipants,
-                        remainingByCampus: courseAvailability?.campusRemaining,
-                      },
-                    ];
+                  ? course.bookingChoices.flatMap((choice) => {
+                      const capacity =
+                        choice.maxParticipants ?? course.maxParticipants;
+                      return capacity === undefined
+                        ? []
+                        : [
+                            {
+                              label: choice.label,
+                              capacity,
+                              remainingByCampus:
+                                courseAvailability?.choiceCampusRemaining?.[
+                                  choice.id
+                                ],
+                            },
+                          ];
+                    })
+                  : course.maxParticipants === undefined
+                    ? []
+                    : [
+                        {
+                          label: "Availability",
+                          capacity: course.maxParticipants,
+                          remainingByCampus:
+                            courseAvailability?.campusRemaining,
+                        },
+                      ];
 
                 return (
                   <Card
                     key={course.id}
-                    className="relative overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300"
+                    className={`relative overflow-hidden flex flex-col group hover:shadow-lg transition-shadow duration-300 ${course.bookingDeadline ? "sm:col-span-2 lg:col-span-2 xl:col-span-2" : ""}`}
                     style={{ "--card-spacing": "0px" } as React.CSSProperties}
                   >
                     {!available ? (
@@ -287,10 +307,15 @@ export default function ShortCoursesPage() {
                         Coming Soon
                       </Badge>
                     ) : null}
+                    {course.bookingDeadline ? (
+                      <Badge className="absolute top-3 left-3 z-10 bg-primary text-white border-primary">
+                        Student fundraiser
+                      </Badge>
+                    ) : null}
 
                     {/* Gradient image area */}
                     <div
-                      className={`relative h-40 flex items-center justify-center shrink-0 overflow-hidden ${!course.cardImage ? `bg-linear-to-br ${CATEGORY_GRADIENTS[course.category]}` : ""} ${!available ? "saturate-50" : ""}`}
+                      className={`relative ${course.bookingDeadline ? "aspect-[3/2] w-full" : "h-40"} flex items-center justify-center shrink-0 overflow-hidden ${!course.cardImage ? `bg-linear-to-br ${CATEGORY_GRADIENTS[course.category]}` : ""} ${!available ? "saturate-50" : ""}`}
                     >
                       {course.cardImage ? (
                         <Image
@@ -311,7 +336,20 @@ export default function ShortCoursesPage() {
                     <div
                       className={`flex flex-col flex-1 px-4 pt-4 pb-0 ${!available ? "opacity-75 blur-[1px]" : ""}`}
                     >
-                      {dateParts ? (
+                      {course.bookingDeadline ? (
+                        <div className="mb-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3">
+                          <p className="text-[11px] uppercase tracking-wide text-primary/80 font-semibold">
+                            Fundraiser orders close
+                          </p>
+                          <p className="mt-1 text-lg font-bold text-primary">
+                            {formatDate(course.bookingDeadline)}
+                          </p>
+                          <p className="mt-1 text-sm text-muted-foreground">
+                            Six cookie flavours in every box · Collect from
+                            Mokopane or Polokwane
+                          </p>
+                        </div>
+                      ) : dateParts ? (
                         <div className="mb-3 rounded-xl border border-primary/20 bg-primary/5 px-3 py-2.5">
                           <div className="flex items-center justify-between gap-3">
                             <div>
@@ -365,12 +403,14 @@ export default function ShortCoursesPage() {
                       <h3 className="font-bold text-foreground leading-snug group-hover:text-primary transition-colors">
                         {course.title}
                       </h3>
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3 shrink-0" />
-                          {course.duration}
-                        </span>
-                      </div>
+                      {!course.bookingDeadline ? (
+                        <div className="flex items-center gap-3 text-xs text-muted-foreground mt-1.5">
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3 shrink-0" />
+                            {course.duration}
+                          </span>
+                        </div>
+                      ) : null}
                       <div className="mt-2 border-t border-border pt-2 space-y-1.5">
                         {availabilityRows.map((row) => (
                           <div
@@ -403,14 +443,22 @@ export default function ShortCoursesPage() {
                           </div>
                         ))}
                       </div>
-                      <ScrollArea className="mt-3 h-22 pr-2">
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                      {course.bookingDeadline ? (
+                        <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
                           {course.description}
                         </p>
-                      </ScrollArea>
-                      <p className="mt-3 border-l-2 border-amber-500 pl-2 text-[11px] leading-relaxed text-amber-800">
-                        {COURSE_DISCLAIMER}
-                      </p>
+                      ) : (
+                        <>
+                          <ScrollArea className="mt-3 h-22 pr-2">
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {course.description}
+                            </p>
+                          </ScrollArea>
+                          <p className="mt-3 border-l-2 border-amber-500 pl-2 text-[11px] leading-relaxed text-amber-800">
+                            {COURSE_DISCLAIMER}
+                          </p>
+                        </>
+                      )}
                     </div>
 
                     {/* Footer */}
@@ -424,7 +472,9 @@ export default function ShortCoursesPage() {
                       ) : (
                         <div>
                           <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
-                            From
+                            {course.bookingUnit
+                              ? `Per ${course.bookingUnit.singular}`
+                              : "From"}
                           </p>
                           <p className="text-lg font-bold text-primary leading-none">
                             {formatPrice(course.price)}
@@ -437,7 +487,11 @@ export default function ShortCoursesPage() {
                         disabled={!available}
                         onClick={() => available && setBookingCourse(course)}
                       >
-                        {available ? "Book Now" : "Coming Soon"}
+                        {available
+                          ? course.bookingUnit
+                            ? "Order a Box"
+                            : "Book Now"
+                          : "Coming Soon"}
                       </Button>
                     </div>
                   </Card>

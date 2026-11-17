@@ -90,32 +90,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const capacity = selectedChoice?.maxParticipants ?? course.maxParticipants;
-    const paidCount = await prisma.booking.aggregate({
-      _sum: { participants: true },
-      where: {
-        courseId: String(courseId),
-        campus: String(campus),
-        status: "paid",
-        ...(selectedChoice
-          ? { courseTitle: { contains: `(${selectedChoice.label})` } }
-          : {}),
-      },
-    });
-
-    const alreadyPaid = paidCount._sum.participants ?? 0;
-    const remaining = Math.max(capacity - alreadyPaid, 0);
-
-    if (participantsNumber > remaining) {
+    const expectedPrice = selectedChoice?.price ?? course.price;
+    if (pricePerPersonNumber !== expectedPrice) {
       return NextResponse.json(
-        {
-          error:
-            remaining > 0
-              ? `Only ${remaining} spot(s) left for this option.`
-              : "This option is sold out.",
-        },
-        { status: 409 },
+        { error: "The price has changed. Please refresh and try again." },
+        { status: 400 },
       );
+    }
+
+    const capacity = selectedChoice?.maxParticipants ?? course.maxParticipants;
+    if (capacity !== undefined) {
+      const paidCount = await prisma.booking.aggregate({
+        _sum: { participants: true },
+        where: {
+          courseId: String(courseId),
+          campus: String(campus),
+          status: "paid",
+          ...(selectedChoice
+            ? { courseTitle: { contains: `(${selectedChoice.label})` } }
+            : {}),
+        },
+      });
+
+      const alreadyPaid = paidCount._sum.participants ?? 0;
+      const remaining = Math.max(capacity - alreadyPaid, 0);
+
+      if (participantsNumber > remaining) {
+        return NextResponse.json(
+          {
+            error:
+              remaining > 0
+                ? `Only ${remaining} spot(s) left for this option.`
+                : "This option is sold out.",
+          },
+          { status: 409 },
+        );
+      }
     }
 
     const sanitizedCourseTitle = selectedChoice
@@ -125,7 +135,7 @@ export async function POST(req: NextRequest) {
     const normalizedEmail = String(email).trim().toLowerCase();
 
     const amountInCents = Math.round(
-      pricePerPersonNumber * participantsNumber * 100,
+      expectedPrice * participantsNumber * 100,
     );
     const requestReferenceId = randomUUID();
     const clientReferenceId = `${normalizedEmail}:${requestReferenceId}`;
@@ -161,7 +171,7 @@ export async function POST(req: NextRequest) {
           {
             displayName: sanitizedCourseTitle,
             quantity: participantsNumber,
-            pricingDetails: { price: Math.round(pricePerPersonNumber * 100) },
+            pricingDetails: { price: Math.round(expectedPrice * 100) },
             description: `${campus} Campus · ${date}`,
           },
         ],

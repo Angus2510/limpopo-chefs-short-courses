@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { CheckCircle2, ChefHat, Calendar, MapPin, Users } from "lucide-react";
-import { formatDate, formatPrice } from "@/lib/courses";
+import { COURSES, formatDate, formatPrice } from "@/lib/courses";
 import { sendBookingConfirmation } from "@/lib/booking-confirmation-email";
 
 export default async function PaymentSuccessPage({
@@ -50,6 +50,9 @@ export default async function PaymentSuccessPage({
   const booking = ref
     ? await prisma.booking.findFirst({ where: { clientReferenceId: ref } })
     : null;
+  const bookingCourse = booking
+    ? COURSES.find((course) => course.id === booking.courseId)
+    : undefined;
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -71,10 +74,14 @@ export default async function PaymentSuccessPage({
               <CheckCircle2 className="w-10 h-10 text-primary" />
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
-              Booking Confirmed!
+              {bookingCourse?.bookingUnit
+                ? "Order Confirmed!"
+                : "Booking Confirmed!"}
             </h1>
             <p className="text-muted-foreground">
-              Your spot is reserved. A confirmation will be sent to your email.
+              {bookingCourse?.bookingUnit
+                ? "Your order is confirmed. A confirmation will be sent to your email."
+                : "Your spot is reserved. A confirmation will be sent to your email."}
             </p>
           </div>
 
@@ -99,14 +106,22 @@ export default async function PaymentSuccessPage({
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Calendar className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-muted-foreground">Date:</span>
+                  <span className="text-muted-foreground">
+                    {bookingCourse?.bookingDeadline
+                      ? "Order deadline:"
+                      : "Date:"}
+                  </span>
                   <span className="font-medium text-foreground">
                     {formatDate(booking.date)}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Users className="w-4 h-4 text-primary shrink-0" />
-                  <span className="text-muted-foreground">Participants:</span>
+                  <span className="text-muted-foreground">
+                    {bookingCourse?.bookingUnit
+                      ? `${bookingCourse.bookingUnit.plural}:`
+                      : "Participants:"}
+                  </span>
                   <span className="font-medium text-foreground">
                     {booking.participants}
                   </span>

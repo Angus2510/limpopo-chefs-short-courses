@@ -1,11 +1,12 @@
 import { Resend } from "resend";
-import { formatDate, formatPrice } from "@/lib/courses";
+import { COURSES, formatDate, formatPrice } from "@/lib/courses";
 
 type BookingConfirmation = {
   id: string;
   firstName: string;
   lastName: string;
   email: string;
+  courseId: string;
   courseTitle: string;
   campus: string;
   date: string;
@@ -36,6 +37,10 @@ export async function sendBookingConfirmation(booking: BookingConfirmation) {
   const resend = new Resend(apiKey);
   const customerName = `${booking.firstName} ${booking.lastName}`.trim();
   const reference = booking.id;
+  const course = COURSES.find((item) => item.id === booking.courseId);
+  const dateLabel = course?.bookingDeadline ? "Order deadline" : "Date";
+  const quantityLabel = course?.bookingUnit?.plural ?? "Participants";
+  const bookingLabel = course?.bookingUnit ? "order" : "booking";
   const formattedDate = formatDate(booking.date);
   const formattedAmount = formatPrice(booking.amount / 100);
   const logoUrl = "https://shortcourses.limpopochefs.co.za/logo.png";
@@ -57,9 +62,9 @@ export async function sendBookingConfirmation(booking: BookingConfirmation) {
   const text = [
     `Hello ${customerName},`,
     "",
-    "Your booking is confirmed.",
-    `Date: ${formattedDate}`,
-    `Participants: ${booking.participants}`,
+    `Your ${bookingLabel} is confirmed.`,
+    `${dateLabel}: ${formattedDate}`,
+    `${quantityLabel}: ${booking.participants}`,
     `Total paid: ${formattedAmount}`,
     `Booking reference: ${reference}`,
     "",
@@ -81,16 +86,16 @@ export async function sendBookingConfirmation(booking: BookingConfirmation) {
         ${logoUrl ? `<div style="background:#ffffff;padding:20px 24px 8px;text-align:center"><img src="${escapeHtml(logoUrl)}" alt="Limpopo Chefs Academy" width="220" style="display:block;width:220px;max-width:100%;height:auto;margin:0 auto" /></div>` : `<div style="background:#ffffff;padding:20px 24px 8px;text-align:center;font-size:18px;font-weight:700;color:#315631">Limpopo Chefs Academy</div>`}
         <div style="background:#315631;padding:24px;color:#ffffff">
           <p style="margin:0 0 8px;font-size:12px;letter-spacing:1px;text-transform:uppercase;opacity:.75">Limpopo Chefs Academy</p>
-          <h1 style="margin:0;font-size:24px;line-height:1.25">Your booking is confirmed</h1>
+          <h1 style="margin:0;font-size:24px;line-height:1.25">Your ${bookingLabel} is confirmed</h1>
         </div>
         <div style="padding:24px">
-          <p style="margin:0 0 20px;font-size:16px;line-height:1.5">Hello ${escapeHtml(customerName)}, your booking has been successfully confirmed.</p>
+          <p style="margin:0 0 20px;font-size:16px;line-height:1.5">Hello ${escapeHtml(customerName)}, your ${bookingLabel} has been successfully confirmed.</p>
           <div style="border:1px solid #e5e5e5;border-radius:8px;padding:16px">
             <p style="margin:0 0 12px;font-size:12px;text-transform:uppercase;letter-spacing:1px;color:#666">Booking details</p>
             <p style="margin:8px 0"><strong>Course:</strong> ${escapeHtml(booking.courseTitle)}</p>
             <p style="margin:8px 0"><strong>Campus:</strong> ${escapeHtml(booking.campus)}</p>
-            <p style="margin:8px 0"><strong>Date:</strong> ${escapeHtml(formattedDate)}</p>
-            <p style="margin:8px 0"><strong>Participants:</strong> ${booking.participants}</p>
+            <p style="margin:8px 0"><strong>${escapeHtml(dateLabel)}:</strong> ${escapeHtml(formattedDate)}</p>
+            <p style="margin:8px 0"><strong>${escapeHtml(quantityLabel)}:</strong> ${booking.participants}</p>
             <p style="margin:8px 0"><strong>Total paid:</strong> ${escapeHtml(formattedAmount)}</p>
             <p style="margin:8px 0 0"><strong>Booking reference:</strong> ${escapeHtml(reference)}</p>
           </div>

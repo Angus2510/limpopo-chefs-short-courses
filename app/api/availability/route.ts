@@ -29,6 +29,8 @@ export async function GET() {
   const availability: AvailabilityByCourse = {};
 
   for (const course of COURSES) {
+    if (course.maxParticipants === undefined) continue;
+
     const bookingsForCourse = paidBookings.filter(
       (booking) => booking.courseId === course.id,
     );

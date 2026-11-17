@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
       courseId: course.id,
       courseTitle,
       campus,
-      date: date || course.availableDates[0] || "",
+      date: date || course.availableDates[0] || course.bookingDeadline || "",
       participants,
       amount: Math.round(amountRand * 100),
       status: "paid",

@@ -29,7 +29,8 @@ export async function GET() {
   const availability: AvailabilityByCourse = {};
 
   for (const course of COURSES) {
-    if (course.maxParticipants === undefined) continue;
+    const capacity = course.maxParticipants;
+    if (capacity === undefined) continue;
 
     const bookingsForCourse = paidBookings.filter(
       (booking) => booking.courseId === course.id,
@@ -44,7 +45,7 @@ export async function GET() {
           .filter((booking) => booking.campus === campus)
           .reduce((sum, booking) => sum + booking.participants, 0);
 
-        acc[campus] = Math.max(course.maxParticipants - paidForCampus, 0);
+        acc[campus] = Math.max(capacity - paidForCampus, 0);
         return acc;
       },
       {} as Record<Campus, number>,
@@ -61,7 +62,7 @@ export async function GET() {
       const choiceCampusRemaining: Record<string, Record<Campus, number>> = {};
 
       for (const choice of course.bookingChoices) {
-        const choiceCapacity = choice.maxParticipants ?? course.maxParticipants;
+        const choiceCapacity = choice.maxParticipants ?? capacity;
         const campusChoiceRemaining = courseCampuses.reduce(
           (acc, campus) => {
             const paidForCampusChoice = bookingsForCourse

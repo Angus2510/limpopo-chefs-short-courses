@@ -14,6 +14,7 @@ type BookingRow = {
   courseId: string;
   courseTitle: string;
   campus: string;
+  status: string;
   paid: boolean;
   email: string;
   phone: string | null;
@@ -48,8 +49,20 @@ export default function AdminBookingsPage() {
     label: course.title,
   }));
   const uniqueCourseTitles = Array.from(
-    new Set(confirmedBookings.map((booking) => booking.courseTitle)),
+    new Set(visibleBookings.map((booking) => booking.courseTitle)),
   ).sort((a, b) => a.localeCompare(b));
+  const visibleBookingsFilteredByCourse =
+    selectedCourse === "All courses"
+      ? visibleBookings
+      : visibleBookings.filter(
+          (booking) => booking.courseTitle === selectedCourse,
+        );
+  const displayedBookings =
+    selectedCampus === "All campuses"
+      ? visibleBookingsFilteredByCourse
+      : visibleBookingsFilteredByCourse.filter(
+          (booking) => booking.campus === selectedCampus,
+        );
   const bookingsFilteredByCourse =
     selectedCourse === "All courses"
       ? confirmedBookings
@@ -63,7 +76,7 @@ export default function AdminBookingsPage() {
           (booking) => booking.campus === selectedCampus,
         );
   const uniqueCampuses = Array.from(
-    new Set(bookingsFilteredByCourse.map((booking) => booking.campus)),
+    new Set(visibleBookingsFilteredByCourse.map((booking) => booking.campus)),
   ).sort();
   const printableTotalPeople = printableBookings.reduce(
     (sum, booking) => sum + booking.participants,
@@ -400,7 +413,7 @@ export default function AdminBookingsPage() {
         <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-end md:justify-between no-print">
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-foreground">
-              Select course to print
+              Select course
             </label>
             <select
               value={selectedCourse}
@@ -418,7 +431,7 @@ export default function AdminBookingsPage() {
 
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-medium text-foreground">
-              Select campus to print
+              Select campus
             </label>
             <select
               value={selectedCampus}
@@ -623,27 +636,27 @@ export default function AdminBookingsPage() {
                 <th className="px-3 py-3 print:hidden">Move To</th>
                 <th className="px-3 py-3">Campus</th>
                 <th className="px-3 py-3">People</th>
-                <th className="px-3 py-3 print:hidden">Paid</th>
+                <th className="px-3 py-3 print:hidden">Payment status</th>
                 <th className="px-3 py-3 print:hidden">Email</th>
                 <th className="px-3 py-3">Phone</th>
                 <th className="px-3 py-3 print:hidden">Booked</th>
               </tr>
             </thead>
             <tbody>
-              {printableBookings.length === 0 ? (
+              {displayedBookings.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={8}
+                    colSpan={9}
                     className="px-4 py-8 text-center text-muted-foreground"
                   >
-                    No paid bookings for this course yet.
+                    No bookings for this selection yet.
                   </td>
                 </tr>
               ) : (
-                printableBookings.map((booking) => (
+                displayedBookings.map((booking) => (
                   <tr
                     key={booking.id}
-                    className="border-t border-border align-top"
+                    className={`border-t border-border align-top ${booking.paid ? "" : "print:hidden"}`}
                   >
                     <td className="px-3 py-3 font-medium text-foreground">
                       {booking.firstName?.trim() ||
@@ -659,7 +672,7 @@ export default function AdminBookingsPage() {
                         onChange={(event) =>
                           handleTransferBooking(booking.id, event.target.value)
                         }
-                        disabled={transferringId === booking.id}
+                        disabled={!booking.paid || transferringId === booking.id}
                         className="h-9 rounded-lg border border-border bg-background px-2 text-xs text-foreground"
                       >
                         {courseOptions.map((course) => (
@@ -677,13 +690,13 @@ export default function AdminBookingsPage() {
                     </td>
                     <td className="px-3 py-3 print:hidden">
                       <span
-                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-semibold capitalize ${
                           booking.paid
                             ? "bg-green-100 text-green-800"
                             : "bg-amber-100 text-amber-800"
                         }`}
                       >
-                        {booking.paid ? "Yes" : "No"}
+                        {booking.status}
                       </span>
                     </td>
                     <td className="px-3 py-3 text-foreground print:hidden">
